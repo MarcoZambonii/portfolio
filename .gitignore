@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Company-confidential thesis. The password prompt in index.html is client-side
+# only, so committing this file publishes the document. See README.
+assets/research-irbema.pdf

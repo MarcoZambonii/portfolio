@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoostNote — how it works</title>
+<meta name="description" content="How BoostNote turns lecture material into study notes: the retrieval loop, the anti-hallucination checks, and the vault architecture behind the app.">
+<meta name="author" content="Marco Zamboni">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0a0d">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Marco Zamboni">
+<meta property="og:title" content="BoostNote — how it works">
+<meta property="og:description" content="How BoostNote turns lecture material into study notes: the retrieval loop, the anti-hallucination checks, and the vault architecture behind the app.">
+<meta name="twitter:card" content="summary">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#0a0a0d;color:#ececf1;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-wrap:pretty;overflow-x:hidden}
+a{color:#a78bfa} a:hover{color:#c4b5fd}
+::selection{background:rgba(139,92,246,.35)}
+@keyframes hintdrop{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(6px);opacity:.9}}
+@keyframes drawcircle{from{stroke-dashoffset:640}to{stroke-dashoffset:0}}
+@keyframes pillin{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}
+.pen-wait *{animation-play-state:paused !important}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none !important;transition:none !important}[data-pillin]{opacity:1 !important}#loopPath{stroke-dashoffset:0 !important}}
+</style>
+</helmet>
+<div style="min-height:100vh;position:relative;overflow:hidden">
+  <div aria-hidden="true" style="position:absolute;top:-180px;left:-140px;width:700px;height:700px;background:radial-gradient(closest-side,rgba(139,92,246,.15),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+
+  <nav style="position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:4px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.09);background:rgba(16,16,21,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+    <a href="index.html" style="font-size:13px;color:#b9b9c6;text-decoration:none;padding:7px 14px;border-radius:999px;white-space:nowrap" style-hover="color:#fff;background:rgba(139,92,246,.18)">← Portfolio</a>
+    <a href="https://github.com/MarcoZambonii/BoostNote" style="font-size:13px;color:#b9b9c6;text-decoration:none;padding:7px 14px;border-radius:999px;white-space:nowrap" style-hover="color:#fff;background:rgba(139,92,246,.18)">GitHub</a>
+  </nav>
+
+  <section data-screen-label="Hero" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px clamp(20px,5vw,56px) 40px;box-sizing:border-box;position:relative">
+    <img src="assets/boostnote-icon.png" alt="BoostNote app icon" style="width:128px;height:128px;border-radius:30px;border:1px solid rgba(139,92,246,.4);box-shadow:0 24px 80px rgba(139,92,246,.35)">
+    <h1 style="font-size:clamp(44px,7vw,84px);font-weight:800;letter-spacing:-0.03em;line-height:1;margin:36px 0 0">BoostNote</h1>
+    <p style="font-size:clamp(18px,2.4vw,24px);line-height:1.55;color:#c9c9d4;max-width:44ch;margin:22px 0 0">The iPad app for taking notes and studying, built for PoliMi engineering students.</p>
+    <p style="font-size:clamp(14px,1.7vw,17px);line-height:1.7;color:#9a9aa6;max-width:52ch;margin:16px 0 0">Born from a real need: writing by hand on your dispense, every engineering tool in the same interface — one ecosystem — and course materials turned into study paths. All of it with <span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600">no subscriptions, no servers to maintain</span>.</p>
+    <div style="margin-top:56px;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.32em;color:#6f6f7c">SCROLL</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="animation:hintdrop 2.6s ease-in-out infinite"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+    </div>
+  </section>
+
+  <section data-screen-label="Idea 1 Magic Pen" style="min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
+    <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:22px;width:100%">
+      <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 01 · THE MAGIC PEN</span>
+        <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0">Circle it.<br><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">Solve it.</span></h2>
+        <p style="font-size:clamp(15px,1.8vw,18px);line-height:1.65;color:#9a9aa6;max-width:56ch;margin:0">Circle any expression by hand — the magic pen sends it to Wolfram Alpha and the answer comes back onto the page. Every engineering tool lives in the same side panel, at pen's reach.</p>
+      </div>
+      <div class="{{ penCls }}" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+          <div data-pillin="true" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;white-space:nowrap;opacity:0;animation:pillin .5s ease-out 2.7s forwards;border:1px solid rgba(74,222,128,.45);background:rgba(74,222,128,.07)">
+            <span style="font-family:'Times New Roman',Georgia,serif;font-style:italic;font-size:18px;color:#ececf1">= 1</span>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#4ade80">SOLVED · WOLFRAM ALPHA</span>
+          </div>
+          <div data-pillin="true" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;white-space:nowrap;opacity:0;animation:pillin .5s ease-out 3.5s forwards;border:1px solid rgba(139,92,246,.5);background:rgba(139,92,246,.08)">
+            <svg width="26" height="16" viewBox="0 0 26 16" fill="none" aria-hidden="true"><path d="M1 15 C6 15 8 1 13 1 C18 1 20 15 25 15" stroke="#c4b5fd" stroke-width="1.6" stroke-linecap="round"></path></svg>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#c4b5fd">PLOTTED · DESMOS</span>
+          </div>
+        </div>
+        <div style="position:relative;padding:38px 54px;border:1px solid #26262e;border-radius:20px;background:#101014">
+          <span style="font-family:'Times New Roman',Georgia,serif;font-style:italic;font-size:clamp(26px,4vw,40px);color:#ececf1;white-space:nowrap">∫<sub style="font-size:.45em;font-style:normal;vertical-align:-0.45em">0</sub><sup style="font-size:.45em;font-style:normal;vertical-align:0.85em;margin-left:-0.25em">1</sup> 3x² dx</span>
+          <svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
+            <path id="loopPath" d="M150,14 C230,10 288,34 286,60 C284,90 220,108 148,106 C70,104 14,88 16,58 C18,28 80,18 150,14 Z" fill="none" stroke="#d946ef" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="640" stroke-dashoffset="640" style="animation:drawcircle 2.6s ease-in-out forwards"></path>
+            <g opacity="0.95">
+              <animateMotion begin="indefinite" dur="2.6s" repeatCount="1" fill="freeze" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#loopPath"></mpath></animateMotion>
+              <g transform="rotate(-35) translate(0,-1)">
+                <path d="M0 0 L-7 -3.4 L-7 3.4 Z" fill="#ececf1"></path>
+                <path d="M0 0 L-3 -1.5 L-3 1.5 Z" fill="#d946ef"></path>
+                <rect x="-27" y="-3.4" width="20" height="6.8" rx="1.6" fill="url(#penGrad)"></rect>
+                <rect x="-31" y="-3.4" width="4" height="6.8" rx="1.4" fill="#c4b5fd"></rect>
+              </g>
+            </g>
+            <defs><linearGradient id="penGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6"></stop><stop offset="1" stop-color="#d946ef"></stop></linearGradient></defs>
+          </svg>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+          <div data-pillin="true" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;white-space:nowrap;opacity:0;animation:pillin .5s ease-out 4.3s forwards;border:1px solid rgba(217,70,239,.5);background:rgba(217,70,239,.07)">
+            <span style="font-family:'Times New Roman',Georgia,serif;font-style:italic;font-size:15px;color:#ececf1">[x³]<sub style="font-size:.6em;font-style:normal;vertical-align:-0.35em">0</sub><sup style="font-size:.6em;font-style:normal;vertical-align:0.55em;margin-left:-0.35em">1</sup> = 1</span>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#e9a8f5">STEP BY STEP · WOLFRAM</span>
+          </div>
+          <div data-pillin="true" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;white-space:nowrap;opacity:0;animation:pillin .5s ease-out 5.1s forwards;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.06)">
+            <span style="font-size:13px;color:#ececf1">"The area under 3x² from 0 to 1…"</span>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#fbbf24">EXPLAINED · AI</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+      <div ref="{{ toolsRowRef }}" onScroll="{{ onToolsScroll }}" onPointerDown="{{ onToolsGrab }}" style="display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px; scrollbar-width: none; mask-image: linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%); -webkit-mask-image: linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%); width: 800px; height: 131px">
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">MAGIC PEN</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">Circle an expression by hand — it is recognized and sent to the solver.</span>
+        </div>
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">WOLFRAM ALPHA</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">Solves circled or typed expressions, categories verified against the real API.</span>
+        </div>
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">DESMOS GRAPHS</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">Embedded interactive plots, with automatic conversion to LaTeX.</span>
+        </div>
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">TEXT → LATEX</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">From natural language to a composed formula, editable on the page.</span>
+        </div>
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">AI EXPLAIN</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">Step-by-step explanation of a result, rendered with KaTeX.</span>
+        </div>
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">ACADEMIC SEARCH</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">Papers and references, without leaving the note.</span>
+        </div>
+        <div style="flex:none;width:190px;box-sizing:border-box;border:1px solid #26262e;border-radius:14px;background:#101014;padding:16px;display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">CALCULATOR</span>
+          <span style="font-size:13px;line-height:1.55;color:#9a9aa6">Always in the side panel, at pen’s reach.</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:7px;justify-content:center">
+        <sc-for list="{{ toolDots }}" as="d" hint-placeholder-count="7">
+          <span style="{{ d.style }}"></span>
+        </sc-for>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="anti-hallucination" data-screen-label="Idea 2 Studio" style="scroll-margin-top:70px;min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
+    <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:32px;width:100%">
+      <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 02 · THE STUDIO</span>
+        <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0">From materials<br><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">to a study path.</span></h2>
+        <p style="font-size:clamp(15px,1.8vw,18px);line-height:1.65;color:#9a9aa6;max-width:56ch;margin:0">Pick a course — your notes plus the WeBeep files — and the Studio turns it into a study: a summary, flashcards, exercises with correction. Every quote is checked literally against the source before being marked <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:999px;border:1px solid rgba(74,222,128,.45);background:rgba(74,222,128,.08);vertical-align:middle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#4ade80">VERIFIED</span></span>; math is rendered in LaTeX.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;border:1px solid #26262e;border-radius:16px;background:#101014;padding:clamp(18px,3vw,26px)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#a78bfa">HOW AN EXERCISE IS BORN · ANTI-HALLUCINATION PIPELINE</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">
+          <sc-for list="{{ exStages }}" as="st" hint-placeholder-count="4">
+            <div style="{{ st.boxStyle }}">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#ececf1">{{ st.name }}</span>
+              <span style="font-size:11px;color:#9a9aa6">{{ st.sub }}</span>
+              <span style="{{ st.badgeStyle }}">{{ st.badge }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border:1px solid #26262e;border-radius:12px;background:#141418;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-height:130px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#6f6f7c">EXERCISE SET · 3 GENERATED</span>
+          <sc-for list="{{ exSet }}" as="ex" hint-placeholder-count="3">
+            <div style="{{ ex.boxStyle }}">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+                <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#9a9aa6">{{ ex.label }}</span>
+                <span style="{{ ex.solveStyle }}">{{ ex.solve }}</span>
+              </div>
+              <span style="font-size:13px;line-height:1.55;color:#ececf1">{{ ex.text }}</span>
+              <sc-for list="{{ ex.quotes }}" as="q" hint-placeholder-count="0">
+                <div style="display:flex;gap:9px;align-items:baseline">
+                  <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;font-weight:700;color:{{ q.color }};flex:none">{{ q.icon }}</span>
+                  <span style="font-size:12.5px;line-height:1.55;color:{{ q.color }}">{{ q.text }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <sc-if value="{{ exDelivered }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:999px;border:1px solid rgba(139,92,246,.45);background:rgba(139,92,246,.08);align-self:flex-start;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#c4b5fd">2 OF 3 DELIVERED</span>
+          </sc-if>
+        </div>
+        <p style="font-size:12px;line-height:1.7;color:#6f6f7c;margin:0">Two calls per MODULE, not per exercise: the re-solve sends the whole set in one call, so a set of eight exercises costs 2 calls, not 16. Two independent mechanisms: the re-solve discards what doesn't hold, the quote check labels what can't be found — and it uses no AI at all. Safety valve: if the re-solve rejects EVERY exercise, the app assumes the verification went wrong and keeps the originals unmarked. Tolerances are deliberate: case and spacing ignored, a second attempt ignoring symbols (the same formula can be written in different ways), and quotes under 12 characters are not considered at all. Regeneration is never automatic — the student triggers it with a comment on what's wrong.</p>
+      </div>
+      
+    </div>
+  </section>
+
+  <section data-screen-label="Idea 2 Chain" style="min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:20%;right:-200px;width:600px;height:600px;background:radial-gradient(closest-side,rgba(217,70,239,.09),rgba(217,70,239,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="max-width: 980px; margin: 0 auto; padding: 0 clamp(20px,5vw,56px); box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; width: 100%; position: relative">
+      <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 03 · THE CHAIN</span>
+        <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0">Same five models.<br><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">Two different chains.</span></h2>
+        <p style="font-size:clamp(15px,1.8vw,18px);line-height:1.65;color:#9a9aa6;max-width:56ch;margin:0">Quota is per model, so chaining five means 1,060 calls a day instead of 500. The order follows the job: Lite models first where volume matters (reading, summaries), all three full Flash first where reasoning matters (exercises) — and if a Lite ends up generating one, the card says so.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.18em;color:#c4b5fd;display:inline-flex;align-items:center;gap:8px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"></path><path d="M15 16v-2"></path><path d="M8 9h2"></path><path d="M20 9h2"></path><path d="M17.8 11.8 19 13"></path><path d="M15 9h.01"></path><path d="M17.8 6.2 19 5"></path><path d="m3 21 9-9"></path><path d="M12.2 6.2 11 5"></path></svg>
+          BREAK SOMETHING — TAP A FAILURE:</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button onClick="{{ simMinute }}" style="{{ simBtn }}">⚡ 429 · minute limit</button>
+          <button onClick="{{ simDaily }}" style="{{ simBtn }}">⚡ 429 · daily quota</button>
+          <button onClick="{{ simRetired }}" style="{{ simBtn }}">⚡ 404 · model retired</button>
+          <button onClick="{{ simOverload }}" style="{{ simBtn }}">⚡ 503 · overloaded</button>
+          <button onClick="{{ simBad }}" style="{{ simBtn }}">⚡ malformed output</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:6px 0 2px">
+        <button onClick="{{ modeEx }}" style="{{ modeExBtn }}">Exercises</button>
+        <button onClick="{{ modeRead }}" style="{{ modeReadBtn }}">Reading &amp; summaries</button>
+      </div>
+      <div ref="{{ chainRowRef }}" style="display:flex;gap:6px;flex-wrap:nowrap;align-items:center;overflow-x:auto;padding:6px 4px;scrollbar-width:none">
+        <sc-for list="{{ models }}" as="m" hint-placeholder-count="5">
+          <sc-if value="{{ m.notFirst }}" hint-placeholder-val="{{ false }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ m.linkColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;align-self:center;transition:stroke .3s ease"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>
+          </sc-if>
+          <div data-chain-idx="{{ m.idx }}" style="{{ m.boxStyle }}">
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#6f6f7c">LINK {{ m.pos }}</span>
+            <span style="{{ m.nameStyle }}">{{ m.name }}</span>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.08em;color:#6f6f7c">{{ m.quota }}</span>
+            <span style="font-size:12px;color:#9a9aa6">{{ m.role }}</span>
+            <span style="{{ m.badgeStyle }}">{{ m.badge }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border:1px solid #26262e;border-radius:12px;background:#101014;padding:14px 16px;min-height:40px;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:1.6;color:#c4b5fd;text-align:center">{{ chainNote }}</span>
+      </div>
+      <p style="font-size:12px;line-height:1.7;color:#6f6f7c;margin:0;text-align:center;max-width:66ch;align-self:center">A failed attempt never consumes daily quota — only a successful answer does, so breaking a link burns nothing and retrying is free. The chain truly stops in three cases only: no network, wrong or missing API key, user cancel. If all five daily quotas are gone: "All models exhausted today's quota. Resets at Pacific midnight — 9:00 in Italy."</p>
+    </div>
+  </section>
+
+  
+
+  <section data-screen-label="Idea 4 Parallel" style="min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;bottom:0;left:-200px;width:600px;height:600px;background:radial-gradient(closest-side,rgba(139,92,246,.10),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="max-width:800px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:32px;width:100%;position:relative">
+      <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 04 · PARALLELISM</span>
+        <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0">Together,<br><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">not in sequence.</span></h2>
+        <p style="font-size:clamp(15px,1.8vw,18px);line-height:1.65;color:#9a9aa6;max-width:58ch;margin:0">Modules don't depend on each other, so total time isn't the sum — it's the slowest module. And the slowest is always Exercises: the only one on a capable model, spending two calls (generation plus anti-hallucination verification) with reasoning switched on. The other three are extractive tasks on a fast model and finish in a couple of seconds, freeing slots before they're needed. The cap of three isn't about rate limits: past three slots there is nothing to gain, because the three fast modules finish within seconds and the slow one is left alone anyway.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center">
+        <button onClick="{{ genStudy }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(139,92,246,.3);font-family:inherit">Generate a study</button>
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:#a78bfa">{{ inFlightLabel }}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border:1px solid #26262e;border-radius:14px;background:#101014;padding:14px 18px">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:13px;font-weight:600;color:#c9c9d4">Verify exercises against the source</span>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#6f6f7c">A SWITCH IN THE “CREATE STUDY” FLOW · ON BY DEFAULT</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.08em;color:#a78bfa">{{ callEstimate }}</span>
+          <button onClick="{{ toggleVerify }}" aria-label="Toggle verification" style="{{ verifyTrackStyle }}"><span style="{{ verifyKnobStyle }}"></span></button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ mods }}" as="mod" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+              <span style="font-size:13px;font-weight:600;color:#c9c9d4">{{ mod.name }}</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:{{ mod.labColor }}">{{ mod.lab }}</span>
+            </div>
+            <div style="height:6px;border-radius:999px;background:#101014;border:1px solid #26262e;overflow:hidden;{{ mod.trackWidth }}"><div style="{{ mod.barStyle }}"></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border:1px solid rgba(139,92,246,.4);border-radius:16px;background:rgba(139,92,246,.05);padding:clamp(18px,3vw,24px);display:flex;flex-direction:column;gap:18px">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#c4b5fd">THREE HONEST OUTCOMES · NEVER FAKE CONTENT</span>
+        <p style="font-size:clamp(14px,1.6vw,16px);line-height:1.65;color:#c9c9d4;margin:0;max-width:62ch">Succeeded, succeeded with a caveat, failed — and a failed module stays failed, with the real reason. Never filled in with a sample summary: a fake summary looks real and hides the problem.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+              <span style="font-size:13px;font-weight:600;color:#c9c9d4">Summary</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#4ade80">DONE</span>
+            </div>
+            <div style="height:6px;border-radius:999px;background:#101014;border:1px solid #26262e;overflow:hidden"><div style="height:100%;width:100%;background:linear-gradient(90deg,#8b5cf6,#d946ef);border-radius:999px"></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+              <span style="font-size:13px;font-weight:600;color:#c9c9d4">Exercises</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#fbbf24">DONE · WITH A CAVEAT</span>
+            </div>
+            <div style="height:6px;border-radius:999px;background:#101014;border:1px solid #26262e;overflow:hidden"><div style="height:100%;width:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:999px"></div></div>
+            <span style="font-size:12.5px;line-height:1.6;color:#9a9aa6;margin-top:2px">“Today's quota on the better models is gone: these exercises were generated with the fast model and may be simpler. Regenerate them tomorrow for better ones.”</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+              <span style="font-size:13px;font-weight:600;color:#c9c9d4">Flashcards</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#f87171">FAILED — QUOTA EXHAUSTED ON ALL FIVE MODELS · RESETS AT PACIFIC MIDNIGHT</span>
+            </div>
+            <div style="height:6px;border-radius:999px;background:#101014;border:1px solid #26262e;overflow:hidden"><div style="height:100%;width:46%;background:linear-gradient(90deg,#f87171,#fb923c);border-radius:999px"></div></div>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;line-height:1.6;letter-spacing:.06em;color:#6f6f7c;margin-top:2px">OTHER REAL FAILURES: NO NETWORK · MISSING API KEY · NO EXTRACTABLE TEXT · TIME CAP (5 MIN EXERCISES, 3 MIN OTHERS)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Idea 5 Cost" style="min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
+    <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:36px;width:100%">
+      <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 05 · THE CONSTRAINT</span>
+        <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0">Costs scale on the student.<br><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">Never on the developer.</span></h2>
+        <p style="font-size:clamp(15px,1.8vw,18px);line-height:1.65;color:#9a9aa6;max-width:56ch;margin:0">The app must stay free with many users — so no centralized anything. No secrets in the code, no backend to maintain, nothing that bills me when you study more.</p>
+        <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;border:1px solid rgba(74,222,128,.45);background:rgba(74,222,128,.07)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#4ade80">100% FREE · NEARLY ZERO COMPROMISES</span></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+        <div style="border:1px solid #26262e;border-radius:16px;background:#141418;padding:22px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#a78bfa">CLIENT-SIDE AI · BYOK</span>
+          <span style="font-size:14px;line-height:1.6;color:#9a9aa6">Everyone uses their own key: Gemini free tier by default, Claude optional, Apple on-device as zero-config fallback.</span>
+        </div>
+        <div style="border:1px solid #26262e;border-radius:16px;background:#141418;padding:22px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#a78bfa">CLIENT-SIDE WEBEEP</span>
+          <span style="font-size:14px;line-height:1.6;color:#9a9aa6">SSO + MFA login in the browser; the app only holds a Keychain token. Credentials never touch third-party servers.</span>
+        </div>
+        <div style="border:1px solid #26262e;border-radius:16px;background:#141418;padding:22px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#a78bfa">LOCAL-FIRST</span>
+          <span style="font-size:14px;line-height:1.6;color:#9a9aa6">Data lives in SwiftData on the device. No mandatory backend, no server bill, no account.</span>
+        </div>
+      </div>
+      <p style="font-size:14px;line-height:1.7;color:#9a9aa6;max-width:62ch;margin:0 auto;text-align:center">On the all-free setup — Gemini free tier + Apple on-device + Wolfram free AppID — everything works: ink, WeBeep, Studio, magic pen. The only trade-off is the daily call quota, and the chain exists precisely to make it a non-issue.</p>
+    </div>
+  </section>
+
+  <section data-screen-label="Idea 6 Ink" style="min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:10%;right:-180px;width:560px;height:560px;background:radial-gradient(closest-side,rgba(139,92,246,.12),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:28px;width:100%;text-align:center;align-items:center;position:relative">
+      <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 06 · THE INK</span>
+      <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0"><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">240 Hz.</span><br>Ink built from scratch.</h2>
+      <p style="font-size:clamp(15px,1.8vw,18px);line-height:1.65;color:#9a9aa6;max-width:56ch;margin:0">Coalesced touches and prediction from the Apple Pencil, vector rendering, pressure-to-width laws measured empirically. PencilKit survives only as a storage format. Hundred-page dispense stay fluid thanks to tiled rendering with a residency window.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <span style="padding:5px 12px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#b9b9c6">MULTIPLY HIGHLIGHTER</span>
+        <span style="padding:5px 12px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#b9b9c6">OBJECT ERASER</span>
+        <span style="padding:5px 12px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#b9b9c6">LASSO + MOVE</span>
+        <span style="padding:5px 12px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#b9b9c6">LATEX OBJECTS</span>
+        <span style="padding:5px 12px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#b9b9c6">WOLFRAM · DESMOS</span>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Footer" style="padding:40px 0 70px;box-sizing:border-box">
+    <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center">
+      <img src="assets/boostnote-icon.png" alt="BoostNote app icon" style="width:56px;height:56px;border-radius:14px;border:1px solid #2c2c36">
+      <p style="font-size:14px;line-height:1.6;color:#6f6f7c;margin:0;max-width:56ch">SwiftUI · iPadOS 18+ · Apple Pencil. Open the Xcode project and run — no dependencies to resolve. A personal project, in active development; not affiliated with Politecnico di Milano or Moodle/WeBeep.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <a href="https://github.com/MarcoZambonii/BoostNote" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 4px 20px rgba(139,92,246,.3)" style-hover="filter:brightness(1.12)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+          View on GitHub</a>
+        <a href="index.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:999px;border:1px solid #2c2c36;background:#101014;color:#ececf1;font-size:13px;font-weight:600;text-decoration:none" style-hover="border-color:rgba(139,92,246,.6)">← Back to portfolio</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { src: 'digital', chain: ['idle','idle','idle','idle','idle'], chainNote: 'Pick a failure above to watch the chain absorb it.', mods: [{s:'idle'},{s:'idle'},{s:'idle'},{s:'idle'}], inFlight: 0 };
+  timers = []; chainTimers = []; genTimers = []; exTimers = []; autoTimers = {};
+  chainModels = {
+    fl:   { name: 'gemini-flash-latest', quota: '20/DAY · ~11S' },
+    f3p:  { name: 'gemini-3-flash-preview', quota: '20/DAY · ~10S' },
+    f35:  { name: 'gemini-3.5-flash', quota: '20/DAY · ~58S' },
+    lite: { name: 'gemini-flash-lite-latest', quota: '500/DAY · ~2S' },
+    l31:  { name: 'gemini-3.1-flash-lite', quota: '500/DAY · ~2S' }
+  };
+  chainBase = ['fl', 'f3p', 'f35', 'lite', 'l31'];
+  chainModes = {
+    ex:   { order: ['fl', 'f3p', 'f35', 'lite', 'l31'],
+            roles: ['First choice', 'Second full Flash', 'Third full Flash: slow, but full', 'Reserve', 'Last reserve'],
+            note: 'Exercises (and regeneration + verification): all three full Flash first — reasoning before speed, even at 58 seconds.' },
+    read: { order: ['lite', 'l31', 'fl', 'f3p', 'f35'],
+            roles: ['First choice', 'Same quota, reserve', 'Full Flash', 'Full Flash', 'Last resort'],
+            note: 'Reading & summaries (transcriptions, course index, flashcards, review): the Lite models first — six times faster, 500 calls each.' }
+  };
+  modDefs = [
+    { name: 'Summary', dur: 1800, lab: '1 call · fast model' },
+    { name: 'Exercises', dur: 3200, lab: '2 calls · gen + verify' },
+    { name: 'Flashcards', dur: 1300, lab: '1 call' },
+    { name: 'Review points', dur: 1500, lab: '1 call · queued' }
+  ];
+  scenarios = {
+    minute: [
+      { chain: ['try','idle','idle','idle','idle'], note: 'Call hits gemini-flash-lite-latest…' },
+      { chain: ['m429','try','idle','idle','idle'], note: '429 per-minute: note the retryDelay, try the NEXT model immediately — never sleep on the first pass.' },
+      { chain: ['m429','ok','idle','idle','idle'], note: 'gemini-3.1-flash-lite answers in ~1s. Waiting on the first model would have cost up to 30s.' }
+    ],
+    daily: [
+      { chain: ['try','idle','idle','idle','idle'], note: 'Call hits the first Lite…' },
+      { chain: ['d429','try','idle','idle','idle'], note: '429 daily quota: marked in the shared ledger — this model is skipped until midnight (Pacific).' },
+      { chain: ['d429','ok','idle','idle','idle'], note: 'Next model answers. Parallel modules read the same ledger: no one re-discovers a dead model.' }
+    ],
+    retired: [
+      { chain: ['skip','skip','try','idle','idle'], note: 'Both Lite models daily-exhausted — the ledger skips them without a single wasted call…' },
+      { chain: ['skip','skip','e404','try','idle'], note: '404 "no longer available": model retired for new users. The chain continues instead of stopping.' },
+      { chain: ['skip','skip','e404','ok','idle'], note: 'gemini-3-flash-preview answers. Pinned versions can vanish overnight; the "-latest" aliases never do.' }
+    ],
+    overload: [
+      { chain: ['try','idle','idle','idle','idle'], note: 'Call hits the first model…' },
+      { chain: ['e503','try','idle','idle','idle'], note: '503 "high demand" is overload, NOT a network error — treating it as one once froze the whole chain.' },
+      { chain: ['e503','ok','idle','idle','idle'], note: 'The next model absorbs the load. Only real network / invalid-key errors stop the chain.' }
+    ]
+  };
+  clearPool(p) { this[p].forEach(clearTimeout); this[p] = []; }
+  clearTimers() { this.clearPool('timers'); this.clearPool('chainTimers'); this.clearPool('genTimers'); this.clearPool('exTimers'); Object.values(this.autoTimers).forEach(clearInterval); this.autoTimers = {}; }
+  chainRowRef = React.createRef();
+  toolsRowRef = React.createRef();
+  startToolsAuto() {
+    if (this.toolsManual || this.toolsRaf || this.toolsHinted || (this.mq && this.mq.matches)) return;
+    // one-shot hint: nudge forward, come back, stop — shows there's scroll (like the races timeline)
+    this.toolsHinted = true;
+    const t0 = performance.now(), D = 2600;
+    const step = (now) => {
+      const row = this.toolsRowRef.current;
+      if (!row || this.toolsManual) { this.toolsRaf = null; return; }
+      const max = row.scrollWidth - row.clientWidth;
+      const t = Math.min(1, (now - t0) / D);
+      if (max > 4) row.scrollLeft = Math.sin(Math.PI * t) * Math.min(140, max); // smooth out-and-back
+      if (t < 1) this.toolsRaf = requestAnimationFrame(step);
+      else { const r = this.toolsRowRef.current; if (r) r.scrollLeft = 0; this.toolsRaf = null; }
+    };
+    this.toolsRaf = requestAnimationFrame(step);
+  }
+  stopToolsAuto() { if (this.toolsRaf) { cancelAnimationFrame(this.toolsRaf); this.toolsRaf = null; } }
+  scrollToActive(chain) {
+    const idx = chain.findIndex(s => s === 'try' || s === 'ok');
+    const row = this.chainRowRef.current;
+    if (idx < 0 || !row) return;
+    const el = row.querySelector('[data-chain-idx="' + idx + '"]');
+    if (!el) return;
+    row.scrollTo({ left: el.offsetLeft - row.clientWidth / 2 + el.offsetWidth / 2, behavior: 'smooth' });
+  }
+  runStory() {
+    this.clearPool('chainTimers');
+    const steps = [
+      [0, ['try','idle','idle','idle','idle'], 'A request enters the chain from link 1…'],
+      [1700, ['m429','try','idle','idle','idle'], '429 per-minute on link 1 — never sleep on the first pass: jump to link 2.'],
+      [3600, ['m429','d429','try','idle','idle'], 'Link 2 is out of daily quota — written to the shared ledger, skipped until midnight. On to link 3.'],
+      [5600, ['m429','d429','e503','try','idle'], 'Link 3 overloaded (503) — that is demand, not a network error: keep going.'],
+      [7600, ['m429','d429','e503','ok','idle'], 'Link 4 answers in ~4s. Three failures absorbed, zero seconds slept.']
+    ];
+    steps.forEach(([d, chain, note]) => {
+      this.chainTimers.push(setTimeout(() => { this.setState({ chain, chainNote: note }); this.scrollToActive(chain); }, d + 200));
+    });
+  }
+  runEx() {
+    this.clearPool('exTimers');
+    [[0,0],[1800,1],[4200,2],[7000,3],[10000,4],[12500,5]].forEach(([d, ph]) => {
+      this.exTimers.push(setTimeout(() => this.setState({ exPhase: ph }), d));
+    });
+  }
+  componentDidMount() {
+    this.mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (this.mq.matches) return;
+    const els = document.querySelectorAll('[data-reveal]');
+    this.io = new IntersectionObserver((ents) => {
+      ents.forEach(e => {
+        if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'none'; this.io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px)';
+      el.style.transition = 'opacity .8s ease, transform .8s ease';
+      this.io.observe(el);
+    });
+    // scroll-driven demos: each section plays its own animation while in view
+    this.autoIo = new IntersectionObserver((ents) => {
+      ents.forEach(e => {
+        const lab = e.target.getAttribute('data-screen-label') || '';
+        const which = lab.indexOf('Vault') > -1 ? 'vault' : lab.indexOf('Chain') > -1 ? 'chain' : lab.indexOf('Parallel') > -1 ? 'par' : lab.indexOf('Magic') > -1 ? 'pen' : lab.indexOf('Studio') > -1 ? 'studio' : null;
+        if (!which) return;
+        const enough = e.intersectionRatio >= 0.45 || (e.intersectionRect && e.intersectionRect.height > window.innerHeight * 0.4);
+        if (e.isIntersecting && enough) this.startAuto(lab); else if (!e.isIntersecting) this.stopAuto(which);
+      });
+    }, { threshold: [0.1, 0.2, 0.45] });
+    document.querySelectorAll('[data-screen-label]').forEach(s => this.autoIo.observe(s));
+    // the template streams in after load, so the browser's own hash jump fires too early
+    if (location.hash) {
+      const target = document.querySelector(location.hash);
+      if (target) requestAnimationFrame(() => window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 70, behavior: 'auto' }));
+    }
+  }
+  componentWillUnmount() { this.clearTimers(); if (this.io) this.io.disconnect(); if (this.autoIo) this.autoIo.disconnect(); }
+  run(key) {
+    this.clearPool('chainTimers');
+    const cm = this.state.chainMode || 'ex';
+    const n = this.chainModes[cm].order.map(k => this.chainModels[k].name);
+    const job = cm === 'ex' ? 'An exercise generation' : 'A transcription/summary call';
+    const liteHint = cm === 'ex' ? 'the Lite links further down still have their 15 req/min nearly untouched' : 'each link has its own per-minute budget';
+    const S = {
+      minute: [
+        [['try','idle','idle','idle','idle'], job + ' hits ' + n[0] + '…'],
+        [['m429','try','idle','idle','idle'], '429 per-minute. The chain does NOT wait: the minute limit is per model, and ' + liteHint + ' — trying the next link costs one second instead of thirty.'],
+        [['m429','m429','try','idle','idle'], 'Link 2 minute-limited too — on to link 3. A failed attempt consumes no daily quota: retrying is free.'],
+        [['m429','m429','m429','try','idle'], 'Link 3 as well. Worst case, keep going…'],
+        [['m429','m429','m429','m429','m429'], 'ALL five minute-limited — the only moment the chain waits: one sleep of at most 30 s.'],
+        [['try','idle','idle','idle','idle'], 'Second pass, from link 1 — not a stall, a second lap.'],
+        [['ok','idle','idle','idle','idle'], n[0] + ' answers. Nothing was burned along the way.']
+      ],
+      daily: [
+        [['try','idle','idle','idle','idle'], job + ' hits ' + n[0] + '…'],
+        [['d429','try','idle','idle','idle'], '429 daily quota: ' + n[0] + ' is done for today. Written to the shared ledger — resets at Pacific midnight, 9:00 in Italy.'],
+        [['skip','ok','idle','idle','idle'], 'From now on the chain skips it WITHOUT even calling it — no wasted call, no wait. ' + n[1] + ' answers.']
+      ],
+      retired: [
+        [['try','idle','idle','idle','idle'], job + ' hits ' + n[0] + '…'],
+        [['e404','try','idle','idle','idle'], '404 is NOT final: pinned model versions get retired for new users — 3-minute quarantine, then it is retried. The "-latest" aliases are never retired: that is why they lead the chain.'],
+        [['e404','ok','idle','idle','idle'], n[1] + ' answers while ' + n[0] + ' sits out its 3 minutes.']
+      ],
+      overload: [
+        [['try','idle','idle','idle','idle'], job + ' hits ' + n[0] + '…'],
+        [['e503','try','idle','idle','idle'], '503 "high demand" — that is demand, not a network error: 3-minute quarantine, then it retries on its own.'],
+        [['e503','ok','idle','idle','idle'], n[1] + ' absorbs the load. Meanwhile parallel modules skip the quarantined link without paying the ~20 s its error takes to arrive.']
+      ],
+      badout: [
+        [['try','idle','idle','idle','idle'], job + ' hits ' + n[0] + '…'],
+        [['bad','try','idle','idle','idle'], 'Malformed or truncated answer (invalid JSON, blocked content, token cap): a failure of THAT model on THAT prompt — not of the request. Next link.'],
+        [['bad','ok','idle','idle','idle'], n[1] + ' answers. This used to kill the whole generation with four free models never tried.']
+      ]
+    };
+    this.setState({ chain: ['idle','idle','idle','idle','idle'], chainNote: '…' });
+    S[key].forEach((st, i) => {
+      this.chainTimers.push(setTimeout(() => { this.setState({ chain: st[0], chainNote: st[1] }); this.scrollToActive(st[0]); }, 150 + i * 900));
+    });
+  }
+  genStudy() {
+    this.clearPool('genTimers');
+    const set = (i, st) => this.setState(s => ({ mods: s.mods.map((m, j) => j === i ? { s: st } : m) }));
+    const start = (i) => this.setState(s => ({ mods: s.mods.map((m, j) => j === i ? { s: 'run' } : m), inFlight: s.inFlight + 1 }));
+    const done = (i) => this.setState(s => ({ mods: s.mods.map((m, j) => j === i ? { s: 'done' } : m), inFlight: Math.max(0, s.inFlight - 1) }));
+    // order: 0 Summary (2s), 1 Exercises (20s, two phases), 2 Flashcards (2s), 3 Review points (2s, waits for a slot)
+    const verify = this.state.verify !== false;
+    const S = 2000, EX = verify ? 20000 : 10000, T = 2.2; // T: time compression for the demo
+    const at = (ms, fn) => this.genTimers.push(setTimeout(fn, ms / T));
+    this.setState({ mods: [{s:'idle'},{s:'idle'},{s:'idle'},{s:'idle'}], inFlight: 0 });
+    // the 0%-width frame must be PAINTED before flipping to run, or the transition
+    // starts from the fill's auto width and the bars appear full (or shrink)
+    at(300, () => requestAnimationFrame(() => requestAnimationFrame(() => { start(0); start(1); start(2); })));
+    at(300 + S, () => { done(0); start(3); });                 // a Lite frees a slot -> Review points starts
+    at(300 + S + 200, () => done(2));
+    at(300 + 2 * S + 200, () => done(3));                      // all Lite done, only Exercises left
+    if (verify) at(300 + EX * 0.55, () => set(1, 'verify'));   // second phase inside the same bar
+    at(300 + EX, () => done(1));
+  }
+  startAuto(lab) {
+    if (this.mq && this.mq.matches) return;
+    if (lab.indexOf('Magic') > -1) {
+      this.startToolsAuto();
+      if (!this.penStarted) {
+        this.penStarted = true;
+        this.setState({ penGo: true });
+        const am = document.querySelector('section[data-screen-label*="Magic"] animateMotion');
+        if (am && am.beginElement) am.beginElement();
+      }
+    }
+    if (lab.indexOf('Studio') > -1 && !this.exRan) {
+      this.exRan = true;
+      this.runEx();
+    }
+    if (lab.indexOf('Vault') > -1 && !this.autoTimers.vault && !this.manualVault) {
+      const seq = ['digital', 'scan', 'hand']; let i = 0;
+      this.autoTimers.vault = setInterval(() => { i = (i + 1) % 3; this.setState({ src: seq[i] }); }, 2600);
+    }
+    if (lab.indexOf('Chain') > -1 && !this.chainRan && !this.manualChain) {
+      this.chainRan = true;
+      this.runStory();
+    }
+    if (lab.indexOf('Parallel') > -1 && !this.parRan && !this.manualPar) {
+      this.parRan = true; // plays once, then stops on the finished state
+      this.genStudy();
+    }
+  }
+  stopAuto(which) {
+    if (which === 'pen') this.stopToolsAuto();
+    if (this.autoTimers[which]) { clearInterval(this.autoTimers[which]); delete this.autoTimers[which]; }
+  }
+  renderVals() {
+    const src = this.state.src;
+    const btn = (on) => 'padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s ease;' +
+      (on ? 'border:1px solid rgba(139,92,246,.7);background:rgba(139,92,246,.18);color:#fff'
+          : 'border:1px solid #2c2c36;background:#101014;color:#9a9aa6');
+    const levelActive = { digital: [true, false, false], scan: [false, true, false], hand: [false, true, true] };
+    const notes = {
+      digital: ['A digital PDF already has the text inside: instant, free, 100% faithful.', '', ''],
+      scan: ['', 'Apple Vision OCR, on-device: great on typography, free, and it declares its own confidence.', ''],
+      hand: ['', 'Confidence collapses on cursive — Vision alone would read an integral as "xdx".', 'The page goes to the vision model, which also transcribes formulas in LaTeX. One call, only where needed.']
+    };
+    const lvDefs = [
+      { tier: 'LEVEL 1', name: 'Text layer', desc: 'Extract the text a digital PDF already contains.', cost: 'FREE', costColor: '#4ade80' },
+      { tier: 'LEVEL 2', name: 'Vision (Apple), on-device', desc: 'OCR on printed scans, with self-declared confidence.', cost: 'FREE', costColor: '#4ade80' },
+      { tier: 'LEVEL 3', name: 'Vision model', desc: 'Where confidence collapses, the page goes to the model.', cost: '1 CALL', costColor: '#c4b5fd' }
+    ];
+    const levels = lvDefs.map((l, i) => {
+      const active = levelActive[src][i];
+      return { ...l, active, note: notes[src][i],
+        boxStyle: 'border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:7px;transition:all .3s ease;text-align:left;' +
+          (active ? 'border:1px solid rgba(139,92,246,.6);background:rgba(139,92,246,.08);box-shadow:0 6px 24px rgba(139,92,246,.12)'
+                  : 'border:1px solid #26262e;background:#101014;opacity:.55') };
+    });
+    const stMap = {
+      idle: { badge: 'IDLE', bd: '1px solid #26262e', bg: '#101014', bc: '#6f6f7c', op: '1' },
+      try:  { badge: 'CALLING…', bd: '1px solid rgba(139,92,246,.7)', bg: 'rgba(139,92,246,.10)', bc: '#c4b5fd', op: '1' },
+      ok:   { badge: '200 OK', bd: '1px solid rgba(74,222,128,.55)', bg: 'rgba(74,222,128,.07)', bc: '#4ade80', op: '1' },
+      m429: { badge: '429 MINUTE', bd: '1px solid rgba(248,113,113,.55)', bg: 'rgba(248,113,113,.06)', bc: '#f87171', op: '1' },
+      d429: { badge: '429 DAILY', bd: '1px solid rgba(248,113,113,.55)', bg: 'rgba(248,113,113,.06)', bc: '#f87171', op: '1' },
+      e404: { badge: '404 RETIRED · 3 MIN', bd: '1px solid rgba(251,191,36,.55)', bg: 'rgba(251,191,36,.06)', bc: '#fbbf24', op: '.65' },
+      e503: { badge: '503 OVERLOAD · 3 MIN', bd: '1px solid rgba(251,191,36,.55)', bg: 'rgba(251,191,36,.06)', bc: '#fbbf24', op: '.65' },
+      bad:  { badge: 'BAD OUTPUT · NEXT LINK', bd: '1px solid rgba(251,146,60,.55)', bg: 'rgba(251,146,60,.06)', bc: '#fb923c', op: '1' },
+      skip: { badge: 'SKIPPED · NO CALL', bd: '1px dashed #3a3a44', bg: '#101014', bc: '#6f6f7c', op: '.5', strike: 1 }
+    };
+    const anyActive = this.state.chain.some(s => s === 'try' || s === 'ok');
+    const cMode = this.state.chainMode || 'ex';
+    const md = this.chainModes[cMode];
+    const pitch = 172 + 6 + 22 + 6; // card + gap + link icon + gap
+    const models = this.chainBase.map((k, di) => {
+      const slot = md.order.indexOf(k); // displayed position; cards translate to their slot
+      const st = stMap[this.state.chain[slot]];
+      const active = ['try', 'ok'].indexOf(this.state.chain[slot]) > -1;
+      const scale = !anyActive ? 1 : active ? 1.04 : 0.88;
+      return { ...this.chainModels[k], role: md.roles[slot],
+        nameStyle: "font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;font-weight:600;word-break:break-all;color:" + (st.strike ? '#6f6f7c;text-decoration:line-through' : '#ececf1'),
+        notFirst: di > 0, pos: slot + 1, idx: slot,
+        linkColor: anyActive && ['try', 'ok'].indexOf(this.state.chain[di]) > -1 ? '#a78bfa' : '#3a3a44',
+        boxStyle: 'flex:none;width:172px;box-sizing:border-box;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:all .45s ease;text-align:left;transform:translateX(' + ((slot - di) * pitch) + 'px) scale(' + scale + ');border:' + st.bd + ';background:' + st.bg + ';opacity:' + st.op,
+        badge: st.badge,
+        badgeStyle: 'font-family:ui-monospace,monospace;font-size:9px;letter-spacing:.1em;font-weight:600;color:' + st.bc + ';margin-top:2px' };
+    });
+    const modeBtn = (on) => 'padding:8px 18px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s ease;' +
+      (on ? 'border:1px solid rgba(139,92,246,.7);background:rgba(139,92,246,.18);color:#fff' : 'border:1px solid #2c2c36;background:#101014;color:#9a9aa6');
+    const setMode = (m) => {
+      if ((this.state.chainMode || 'ex') === m) return;
+      this.manualChain = 1; this.clearPool('chainTimers');
+      this.setState({ chainMode: m, chain: ['idle','idle','idle','idle','idle'], chainNote: this.chainModes[m].note });
+    };
+    const verifyOn = this.state.verify !== false;
+    const T = 3.2;
+    const modPlan = [
+      { name: 'Summary', ms: 2000, idle: '1 call · Lite · extractive', track: '' },
+      { name: 'Exercises', ms: verifyOn ? 20000 : 10000, idle: (verifyOn ? '2 calls' : '1 call') + ' · full Flash · reasoning on', track: '' },
+      { name: 'Flashcards', ms: 2200, idle: '1 call · Lite · extractive', track: '' },
+      { name: 'Review points', ms: 2000, idle: '1 call · Lite · waits for a free slot', track: '' }
+    ];
+    const modLab = { idle: null, run: ['GENERATING…', '#c4b5fd'], verify: ['VERIFYING vs SOURCE…', '#fbbf24'], done: ['DONE', '#4ade80'] };
+    const mods = modPlan.map((d, i) => {
+      const s = this.state.mods[i].s;
+      const grad = s === 'verify' ? 'linear-gradient(90deg,#8b5cf6,#fbbf24)' : 'linear-gradient(90deg,#8b5cf6,#d946ef)';
+      const bar = s === 'idle' ? 'height:100%;width:0%;background:' + grad + ';border-radius:999px;transition:none'
+        : s === 'run' ? 'height:100%;width:' + (i === 1 && verifyOn ? '55%' : '100%') + ';background:' + grad + ';border-radius:999px;transition:width ' + (i === 1 && verifyOn ? d.ms * 0.55 : d.ms) / T + 'ms linear'
+        : s === 'verify' ? 'height:100%;width:100%;background:' + grad + ';border-radius:999px;transition:width ' + (d.ms * 0.45) / T + 'ms linear'
+        : 'height:100%;width:100%;background:' + grad + ';border-radius:999px;transition:none';
+      return { name: d.name, lab: s === 'idle' ? d.idle : modLab[s][0], labColor: s === 'idle' ? '#6f6f7c' : modLab[s][1], barStyle: bar, trackWidth: d.track };
+    });
+    return {
+      pickDigital: () => { this.manualVault = 1; this.stopAuto('vault'); this.setState({ src: 'digital' }); },
+      pickScan: () => { this.manualVault = 1; this.stopAuto('vault'); this.setState({ src: 'scan' }); },
+      pickHand: () => { this.manualVault = 1; this.stopAuto('vault'); this.setState({ src: 'hand' }); },
+      srcDigitalBtn: btn(src === 'digital'), srcScanBtn: btn(src === 'scan'), srcHandBtn: btn(src === 'hand'),
+      levels,
+      penCls: this.state.penGo ? '' : 'pen-wait',
+      toolsRowRef: this.toolsRowRef,
+      chainRowRef: this.chainRowRef,
+      modeEx: () => setMode('ex'), modeRead: () => setMode('read'),
+      simBad: () => { this.manualChain = 1; this.run('badout'); },
+      toggleVerify: () => { this.manualPar = 1; this.stopAuto('par'); this.setState({ verify: !verifyOn }, () => this.genStudy()); },
+      callEstimate: verifyOn ? 'ESTIMATE: 5 CALLS' : 'ESTIMATE: 4 CALLS',
+      verifyTrackStyle: 'position:relative;width:44px;height:24px;border-radius:999px;border:1px solid ' + (verifyOn ? 'rgba(139,92,246,.7)' : '#2c2c36') + ';background:' + (verifyOn ? 'rgba(139,92,246,.28)' : '#141418') + ';cursor:pointer;transition:all .25s ease;padding:0;flex:none',
+      verifyKnobStyle: 'position:absolute;top:2px;left:' + (verifyOn ? '22px' : '2px') + ';width:18px;height:18px;border-radius:50%;background:' + (verifyOn ? 'linear-gradient(92deg,#8b5cf6,#d946ef)' : '#3a3a44') + ';transition:left .25s ease,background .25s ease',
+      modeExBtn: modeBtn(cMode === 'ex'), modeReadBtn: modeBtn(cMode === 'read'),
+      onToolsGrab: () => {
+        this.toolsManual = true; this.stopToolsAuto();
+        clearTimeout(this.toolsResume);
+        this.toolsResume = setTimeout(() => { this.toolsManual = false; this.startToolsAuto(); }, 8000);
+      },
+      onToolsScroll: () => {
+        const row = this.toolsRowRef.current;
+        if (!row) return;
+        const max = Math.max(1, row.scrollWidth - row.clientWidth);
+        const idx = Math.round((row.scrollLeft / max) * 6);
+        if (idx !== this.state.toolDot) this.setState({ toolDot: idx });
+      },
+      toolDots: [0,1,2,3,4,5,6].map(i => ({
+        style: 'width:7px;height:7px;border-radius:50%;transition:all .3s ease;' +
+          (i === (this.state.toolDot || 0) ? 'background:linear-gradient(92deg,#8b5cf6,#d946ef);transform:scale(1.25)' : 'background:#2c2c36')
+      })),
+      exStages: (() => {
+        const ph = this.state.exPhase || 0;
+        const defs = [
+          { name: '1 · GENERATE', sub: 'CAPABLE model, reasoning on. Tight grounding prompt: only the source text, no theory of its own.' },
+          { name: '2 · QUOTE CHECK', sub: 'String comparison, ZERO AI calls: each quote searched literally in the source while the exercises are decoded. The free defence runs first — no AI call is spent before the quotes are checked.' },
+          { name: '3 · RE-SOLVE', sub: 'A second AI call solves the exercises from scratch and judges the proposed answer. What doesn’t hold is DISCARDED, not flagged.' },
+          { name: '4 · DELIVER', sub: 'What survived the re-solve, every quote labelled VERIFIED or UNVERIFIED.' }
+        ];
+        const stOf = (i) => i === 0 ? (ph === 1 ? 'run' : ph > 1 ? 'done' : 'idle')
+          : i === 1 ? (ph === 2 ? 'run' : ph > 2 ? 'done' : 'idle')
+          : i === 2 ? (ph >= 3 && ph <= 4 ? 'run' : ph >= 5 ? 'done' : 'idle')
+          : (ph >= 5 ? 'done' : 'idle');
+        const look = {
+          idle: ['1px solid #26262e', '#101014', 'IDLE', '#6f6f7c'],
+          run: ['1px solid rgba(139,92,246,.7)', 'rgba(139,92,246,.10)', 'RUNNING…', '#c4b5fd'],
+          done: ['1px solid rgba(74,222,128,.5)', 'rgba(74,222,128,.06)', 'DONE', '#4ade80']
+        };
+        return defs.map((d, i) => {
+          const [bd, bg, badge, bc] = look[stOf(i)];
+          return { ...d, badge,
+            boxStyle: 'border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;transition:all .3s ease;border:' + bd + ';background:' + bg,
+            badgeStyle: "font-family:ui-monospace,monospace;font-size:9px;letter-spacing:.1em;font-weight:600;margin-top:2px;color:" + bc };
+        });
+      })(),
+      exSet: (() => {
+        const ph = this.state.exPhase || 0;
+        const box = (tone) => 'border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;transition:all .3s ease;border:1px solid ' +
+          (tone === 'bad' ? 'rgba(248,113,113,.4);background:rgba(248,113,113,.05)' : tone === 'ok' ? 'rgba(74,222,128,.35);background:rgba(74,222,128,.04)' : '#26262e;background:#101014');
+        const pill = (c, bg) => "font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.1em;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;color:" + c + ';border:1px solid ' + bg;
+        const pending = { solve: 'AWAITING SECOND SOLVE', solveStyle: pill('#6f6f7c', '#26262e'), tone: null };
+        const agreed = { solve: 'SECOND SOLVE: AGREED', solveStyle: pill('#4ade80', 'rgba(74,222,128,.45)'), tone: 'ok' };
+        const discarded = { solve: 'DISCARDED', solveStyle: pill('#f87171', 'rgba(248,113,113,.5)'), tone: 'bad' };
+        const q1 = [];
+        if (ph >= 3) q1.push({ icon: '✓', color: '#4ade80', text: 'Quote "definition of the Riemann integral" — found literally. VERIFIED.' });
+        if (ph >= 4) q1.push({ icon: '~', color: '#fbbf24', text: 'Quote "every monotone function is integrable" — not found. Kept, labelled UNVERIFIED.' });
+        const q2 = ph >= 3 ? [{ icon: '✓', color: '#4ade80', text: 'Quote "a continuous function on a closed interval is integrable" — found literally. VERIFIED.' }] : [];
+        const rows = [
+          { label: 'EXERCISE 1', text: 'Compute the area under f(x) = 3x² on [0, 1] and justify why the integral exists.', st: ph >= 2 ? agreed : pending, quotes: q1 },
+          { label: 'EXERCISE 2', text: 'Show that ∫₀¹ x dx = ½ using the definition as a limit of Riemann sums.', st: ph >= 2 ? agreed : pending, quotes: q2 },
+          { label: 'EXERCISE 3', text: 'State a condition under which a bounded function on [0, 1] fails to be integrable.', st: ph >= 2 ? discarded : pending,
+            quotes: ph >= 2 ? [{ icon: '✗', color: '#f87171', text: "The second solve disagreed with the proposed answer — discarded before delivery. Its quotes had already been checked; they're just never shown." }] : [] }
+        ];
+        return rows.map(r => ({ label: r.label, text: r.text, solve: r.st.solve, solveStyle: r.st.solveStyle, boxStyle: box(r.st.tone), quotes: r.quotes }));
+      })(),
+      exDelivered: (this.state.exPhase || 0) >= 5,
+      simBtn: 'display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:999px;border:1px solid rgba(139,92,246,.55);background:rgba(139,92,246,.14);color:#e4defc;font-size:13px;font-weight:600;font-family:ui-monospace,monospace;letter-spacing:.04em;cursor:pointer;transition:all .2s ease;box-shadow:0 3px 14px rgba(139,92,246,.18)',
+      simMinute: () => { this.manualChain = 1; this.stopAuto('chain'); this.run('minute'); },
+      simDaily: () => { this.manualChain = 1; this.stopAuto('chain'); this.run('daily'); },
+      simRetired: () => { this.manualChain = 1; this.stopAuto('chain'); this.run('retired'); },
+      simOverload: () => { this.manualChain = 1; this.stopAuto('chain'); this.run('overload'); },
+      models, chainNote: this.state.chainNote,
+      genStudy: () => { this.manualPar = 1; this.stopAuto('par'); this.genStudy(); },
+      inFlightLabel: this.state.inFlight + ' / 3 IN FLIGHT',
+      mods
+    };
+  }
+}
+</script>
+</body>
+</html>
