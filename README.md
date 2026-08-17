@@ -1,6 +1,6 @@
 # portfolio
 
-Sito personale di Marco Zamboni. Due pagine statiche, nessuna build.
+Sito personale
 
 ```bash
 python3 -m http.server 4173
