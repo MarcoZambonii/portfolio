@@ -59,17 +59,23 @@ Then in the repository: **Settings → Pages → Build and deployment → Deploy
 branch**, branch `main`, folder `/ (root)`. `.nojekyll` is already committed, which
 is what keeps Pages from dropping files it would otherwise treat as Jekyll sources.
 
-## Assets still to add
+## Assets
 
-Three files could not be exported from the design project (the export API truncates
-any file over 192 KB). Copy them into `assets/` from the original project download:
+The design-project export truncates any file over 192 KB, so three assets came over
+incomplete and were re-fetched from the source repositories instead:
 
-- `assets/boostnote-icon.png` — currently a broken image on both pages. The original
-  is `BoostNote/Assets.xcassets/AppIcon.appiconset/AppIcon-Dark.png` in
-  [MarcoZambonii/BoostNote](https://github.com/MarcoZambonii/BoostNote).
-- `assets/dispense-probabilita.pdf` — linked from the book section ("Read the PDF").
-- `assets/cv-marco-zamboni.pdf` — linked from the contact section ("Download CV").
-  This one was never in the design project at all; the link has always been dead.
+- `assets/boostnote-icon.png` — `AppIcon-Dark.png` from
+  [MarcoZambonii/BoostNote](https://github.com/MarcoZambonii/BoostNote), downscaled
+  1024 → 384 px (the largest on-page rendering is 128 px, and the original was 1 MB).
+- `assets/dispense-probabilita.pdf` — `Dispense_Probabilità.pdf` from
+  [MarcoZambonii/Dispense-Probabilita](https://github.com/MarcoZambonii/Dispense-Probabilita),
+  1.2 MB, unchanged.
+
+Still missing:
+
+- `assets/cv-marco-zamboni.pdf` — the contact section's "Download CV" button points
+  here, but the file was never in the design project either, so that link 404s until
+  you add it.
 
 `assets/handbook-src.pdf` came over intact but no page links to it.
 
