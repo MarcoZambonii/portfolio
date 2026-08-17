@@ -4,3 +4,6 @@
 # Company-confidential thesis. The password prompt in index.html is client-side
 # only, so committing this file publishes the document. See README.
 assets/research-irbema.pdf
+
+# Sorgente del ritratto scontornato: 13 MB, in pagina serve assets/portrait.webp
+assets/portrait.png
