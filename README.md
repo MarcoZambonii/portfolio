@@ -50,14 +50,16 @@ Then open http://localhost:4173.
 
 ## Deploy (GitHub Pages)
 
-```bash
-git remote add origin git@github.com:MarcoZambonii/<repo>.git
-git push -u origin main
-```
+The remote is [MarcoZambonii/portfolio](https://github.com/MarcoZambonii/portfolio)
+(`origin`, branch `main`). To serve it: **Settings → Pages → Build and deployment →
+Deploy from a branch**, branch `main`, folder `/ (root)` — which publishes to
+`https://marcozambonii.github.io/portfolio/`. `.nojekyll` is already committed, and
+that is what keeps Pages from dropping files it would otherwise treat as Jekyll
+sources.
 
-Then in the repository: **Settings → Pages → Build and deployment → Deploy from a
-branch**, branch `main`, folder `/ (root)`. `.nojekyll` is already committed, which
-is what keeps Pages from dropping files it would otherwise treat as Jekyll sources.
+For a root URL instead, the contents of this repo can go into the existing
+`marcozambonii.github.io` repository — every asset path here is relative, so the site
+works at either depth.
 
 ## Assets
 
