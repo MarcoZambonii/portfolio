@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./image-slot.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer="" src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#0a0a0d;color:#ececf1;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-wrap:pretty;overflow-x:hidden;-webkit-text-size-adjust:100%}
+a{color:#a78bfa} a:hover{color:#c4b5fd}
+::selection{background:rgba(139,92,246,.35)}
+:focus-visible{outline:2px solid #8b5cf6;outline-offset:2px}
+@keyframes drawline{from{stroke-dashoffset:220}to{stroke-dashoffset:-220}}
+@keyframes heliaway{0%,30%{transform:translate(0px,-2px);opacity:0}38%{opacity:1;transform:translate(1px,-4px)}72%{transform:translate(26px,-13px);opacity:1}84%,100%{transform:translate(42px,-20px);opacity:0}}
+@keyframes dnfx{0%,20%{opacity:0}26%,80%{opacity:1}88%,100%{opacity:0}}
+@keyframes rotorspin{0%{transform:scaleX(1)}50%{transform:scaleX(.25)}100%{transform:scaleX(1)}}
+@keyframes gearspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="position:relative;min-height:100vh;overflow-x:hidden">
+
+  <canvas ref="{{ canvasRef }}" aria-hidden="true" style="position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0"></canvas>
+
+  <button onClick="{{ toggleMenu }}" aria-label="Menu" aria-expanded="{{ menuOpen }}" style="position:fixed;top:14px;right:14px;z-index:70;width:48px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(16,16,21,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 26px rgba(0,0,0,.45);cursor:pointer">
+    <span style="width:19px;height:1.8px;border-radius:2px;background:#ececf1;display:block"></span>
+    <span style="width:19px;height:1.8px;border-radius:2px;background:#ececf1;display:block"></span>
+    <span style="width:19px;height:1.8px;border-radius:2px;background:#ececf1;display:block"></span>
+  </button>
+
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:65;background:rgba(6,6,9,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+      <nav aria-label="Sections" onClick="{{ stopProp }}" style="position:absolute;top:72px;right:14px;left:14px;display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:18px;border:1px solid rgba(255,255,255,.1);background:rgba(20,20,25,.96);box-shadow:0 20px 60px rgba(0,0,0,.6)">
+        <a href="#about" onClick="{{ closeMenu }}" style="font-size:16px;font-weight:500;color:#ececf1;text-decoration:none;padding:14px 16px;border-radius:12px" style-hover="background:rgba(139,92,246,.16)">About</a>
+        <a href="#book" onClick="{{ closeMenu }}" style="font-size:16px;font-weight:500;color:#ececf1;text-decoration:none;padding:14px 16px;border-radius:12px" style-hover="background:rgba(139,92,246,.16)">Book</a>
+        <a href="#papers" onClick="{{ closeMenu }}" style="font-size:16px;font-weight:500;color:#ececf1;text-decoration:none;padding:14px 16px;border-radius:12px" style-hover="background:rgba(139,92,246,.16)">Papers</a>
+        <a href="#apps" onClick="{{ closeMenu }}" style="font-size:16px;font-weight:500;color:#ececf1;text-decoration:none;padding:14px 16px;border-radius:12px" style-hover="background:rgba(139,92,246,.16)">Apps</a>
+        <a href="#beyond" onClick="{{ closeMenu }}" style="font-size:16px;font-weight:500;color:#ececf1;text-decoration:none;padding:14px 16px;border-radius:12px" style-hover="background:rgba(139,92,246,.16)">Beyond</a>
+        <a href="#contact" onClick="{{ closeMenu }}" style="font-size:16px;font-weight:500;color:#ececf1;text-decoration:none;padding:14px 16px;border-radius:12px" style-hover="background:rgba(139,92,246,.16)">Contact</a>
+      </nav>
+    </div>
+  </sc-if>
+
+  <section id="top" data-screen-label="Hero" style="position:relative;padding:64px 0 20px;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:-180px;left:-140px;width:460px;height:460px;background:radial-gradient(closest-side,rgba(139,92,246,.18),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div aria-hidden="true" style="position:absolute;bottom:-160px;right:-140px;width:420px;height:420px;background:radial-gradient(closest-side,rgba(217,70,239,.12),rgba(217,70,239,0) 70%);pointer-events:none"></div>
+    <div style="position:relative;z-index:1;max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+      <p style="font-size:22px;font-weight:500;color:#b9b9c6;margin:0">Hello,</p>
+      <h1 style="font-size:46px;line-height:1.02;font-weight:800;letter-spacing:-0.025em;margin:0">I am <span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">Marco<br>Zamboni</span></h1>
+      <p style="font-size:16px;line-height:1.6;color:#9a9aa6;margin:0">Mathematical Engineering student at Politecnico di Milano, specializing in Quantitative Finance.</p>
+
+      <sc-if value="{{ showChips }}" hint-placeholder-val="{{ true }}">
+        
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+        <a href="#apps" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 24px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 4px 20px rgba(139,92,246,.3)">See what I've built
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></a>
+        <a href="#contact" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 24px;border-radius:999px;border:1px solid #2c2c36;background:#101014;color:#c9c9d4;font-size:15px;font-weight:500;text-decoration:none">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" data-screen-label="About Me" style="position:relative;padding:64px 0 0;scroll-margin-top:16px">
+    <div data-reveal="true" style="max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+      <div style="display:flex;justify-content:center;margin-bottom:24px">
+        <span style="padding:6px 15px;border-radius:999px;border:1px solid rgba(139,92,246,.45);box-shadow:0 0 18px rgba(139,92,246,.28);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#c4b5fd">01 · EDUCATION</span>
+      </div>
+      <div style="background:#141418;border:1px solid #26262e;border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px;position:relative">
+          <span style="position:absolute;left:0;top:5px;width:10px;height:10px;border-radius:50%;background:linear-gradient(92deg,#8b5cf6,#d946ef);box-shadow:0 0 12px rgba(139,92,246,.5)"></span>
+          <span style="position:absolute;left:4.5px;top:19px;bottom:-20px;width:1px;background:linear-gradient(180deg,rgba(139,92,246,.5),rgba(139,92,246,.08))"></span>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">ONGOING</span>
+          <span style="font-size:15px;font-weight:600;color:#ececf1">M.Sc. Mathematical Engineering</span>
+          <span style="font-size:13.5px;color:#9a9aa6">Politecnico di Milano</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px;position:relative">
+          <span style="position:absolute;left:0;top:5px;width:10px;height:10px;border-radius:50%;background:linear-gradient(92deg,#8b5cf6,#d946ef);box-shadow:0 0 12px rgba(139,92,246,.5)"></span>
+          <span style="position:absolute;left:4.5px;top:19px;bottom:-20px;width:1px;background:linear-gradient(180deg,rgba(139,92,246,.5),rgba(139,92,246,.08))"></span>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">2024</span>
+          <span style="font-size:15px;font-weight:600;color:#ececf1">Exchange</span>
+          <span style="font-size:13.5px;color:#9a9aa6">TU Delft</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px;position:relative">
+          <span style="position:absolute;left:0;top:5px;width:10px;height:10px;border-radius:50%;background:linear-gradient(92deg,#8b5cf6,#d946ef);box-shadow:0 0 12px rgba(139,92,246,.5)"></span>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#a78bfa">2023 — 2026</span>
+          <span style="font-size:15px;font-weight:600;color:#ececf1">B.Sc. Management Engineering</span>
+          <span style="font-size:13.5px;color:#9a9aa6">Politecnico di Milano</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="book" data-screen-label="My Book" style="position:relative;padding:64px 0 0;scroll-margin-top:16px;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:6%;right:-180px;width:420px;height:420px;background:radial-gradient(closest-side,rgba(139,92,246,.13),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="position:relative;max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px">
+        <span style="padding:6px 15px;border-radius:999px;border:1px solid rgba(139,92,246,.45);box-shadow:0 0 18px rgba(139,92,246,.28);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#c4b5fd">02 · MY BOOK</span>
+        <h2 style="font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-0.02em;text-align:center;margin:0">The notes I couldn't find</h2>
+      </div>
+      <div style="background:linear-gradient(140deg,#17141f,#141418 45%);border:1px solid rgba(139,92,246,.28);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:18px">
+        <div style="position:relative;width:min(240px,72%);aspect-ratio:3/4;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 40px rgba(139,92,246,.18);border:1px solid #2c2c36">
+          <image-slot id="book-cover" shape="rounded" radius="11" placeholder="Drop your book cover" style="position:absolute;inset:0;width:100%;height:100%"></image-slot>
+        </div>
+        <h3 style="font-size:27px;font-weight:800;letter-spacing:-0.02em;line-height:1.12;margin:0">Elements of Probability</h3>
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.12em;color:#c4b5fd">184 PAGES · LATEX · FREE</span>
+        <p style="font-size:15px;line-height:1.65;color:#9a9aa6;margin:0">Elements of Probability — a handbook written to get you through the probability course: the full theory rebuilt from the ground up, a complete catalogue of distributions, and the reasoning behind every result — organized the way the exam actually asks for it. Typeset in LaTeX, free for anyone studying.</p>
+        <span style="display:inline-flex;align-items:center;gap:9px;align-self:flex-start">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="m10.29 3.86-8.47 14.14A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+          <span data-katex="\mathbb{P}(\text{errors}) &gt; 0" style="font-size:15px;color:#9a9aa6;white-space:nowrap;font-family:'Times New Roman',Georgia,serif">ℙ(errors) &gt; 0</span>
+        </span>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="assets/dispense-probabilita.pdf" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 18px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:14px;font-weight:600;text-decoration:none;box-shadow:0 4px 20px rgba(139,92,246,.3)">Read the PDF
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
+          <a href="https://github.com/MarcoZambonii/Dispense-Probabilita" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 18px;border-radius:999px;border:1px solid #2c2c36;background:#101014;color:#ececf1;font-size:14px;font-weight:600;text-decoration:none">Source on GitHub
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="papers" data-screen-label="Papers and Studies" style="position:relative;padding:64px 0 0;scroll-margin-top:16px">
+    <div data-reveal="true" style="max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px">
+        <span style="padding:6px 15px;border-radius:999px;border:1px solid rgba(139,92,246,.45);box-shadow:0 0 18px rgba(139,92,246,.28);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#c4b5fd">03 · PAPERS &amp; STUDIES</span>
+        <h2 style="font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-0.02em;text-align:center;margin:0">Research &amp; applied projects</h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <article style="background:#141418;border:1px solid #26262e;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:13px">
+          <div style="width:38px;height:38px;border-radius:11px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+          </div>
+          <h3 style="font-size:19px;font-weight:700;line-height:1.28;margin:0">Recovering the Risk-Neutral Density Across Maturities</h3>
+          <p style="font-size:14px;line-height:1.6;color:#9a9aa6;margin:0">A probabilistic and computational application of the Breeden–Litzenberger result: implied volatility extraction, SVI calibration, an arbitrage-free call price surface, and finite differences to reconstruct the density — with full Python pipeline and validation against the true density.</p>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">breeden–litzenberger</span>
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">svi calibration</span>
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">option pricing</span>
+          </div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <a href="https://cdn.jsdelivr.net/gh/MarcoZambonii/Recovering_the-Risk-Neutral_Density@main/Article.pdf" target="_blank" rel="noopener" style="flex:1 1 120px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;box-shadow:0 4px 20px rgba(139,92,246,.3)">View PDF
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
+            <a href="https://github.com/MarcoZambonii/Recovering_the-Risk-Neutral_Density" style="flex:1 1 100px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:999px;border:1px solid #2c2c36;background:#101014;color:#ececf1;font-size:13.5px;font-weight:600;text-decoration:none">Code
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
+          </div>
+        </article>
+        <article style="background:#141418;border:1px solid #26262e;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:13px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+            <div style="width:38px;height:38px;border-radius:11px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><rect x="7" y="10" width="3" height="8"></rect><rect x="12" y="6" width="3" height="12"></rect><rect x="17" y="13" width="3" height="5"></rect></svg>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(251,191,36,.5);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.1em;color:#fbbf24;text-align:right">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              COMPANY CONFIDENTIAL</span>
+          </div>
+          <h3 style="font-size:19px;font-weight:700;line-height:1.28;margin:0">Theory-Driven vs. Data-Driven Models in Demand Forecasting</h3>
+          <p style="font-size:14px;line-height:1.6;color:#9a9aa6;margin:0">B.Sc. research project carried out at Irbema S.r.l. on behalf of PoliMi: Holt, Croston TSB and ARIMA against Random Forest and XGBoost on a ~300-SKU portfolio, with leakage-free walk-forward validation. Outcome: no universal winner — a per-article decision scheme routing each demand profile to its best model.</p>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">demand forecasting</span>
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">time series</span>
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">ml vs statistics</span>
+          </div>
+          <a href="mailto:marco1.zamboni@mail.polimi.it?subject=Access%20request%20—%20Demand%20forecasting%20research%20project" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 18px;border-radius:999px;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.07);color:#fbbf24;font-size:13.5px;font-weight:600;text-decoration:none">Request access
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
+        </article>
+        <article style="background:#141418;border:1px solid #26262e;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:13px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+            <div style="width:38px;height:38px;border-radius:11px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l3-9 4 18 3-9h3"></path><circle cx="20" cy="12" r="2"></circle></svg>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px dashed rgba(217,70,239,.55);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.1em;color:#e9a8f5"><svg width="12" height="12" viewBox="-12 -12 24 24" aria-hidden="true" style="animation:gearspin 7s linear infinite;transform-origin:50% 50%;flex:none"><g fill="currentColor"><circle cx="0" cy="0" r="7.4"></circle><g><rect x="-1.7" y="-11" width="3.4" height="4.4" rx="1.1"></rect><rect x="-1.7" y="6.6" width="3.4" height="4.4" rx="1.1"></rect><rect x="-11" y="-1.7" width="4.4" height="3.4" rx="1.1"></rect><rect x="6.6" y="-1.7" width="4.4" height="3.4" rx="1.1"></rect><rect x="-1.7" y="-11" width="3.4" height="4.4" rx="1.1" transform="rotate(45)"></rect><rect x="-1.7" y="6.6" width="3.4" height="4.4" rx="1.1" transform="rotate(45)"></rect><rect x="-11" y="-1.7" width="4.4" height="3.4" rx="1.1" transform="rotate(45)"></rect><rect x="6.6" y="-1.7" width="4.4" height="3.4" rx="1.1" transform="rotate(45)"></rect></g><circle cx="0" cy="0" r="2.9" fill="#141418"></circle></g></svg>WORK IN PROGRESS</span>
+          </div>
+          <h3 style="font-size:19px;font-weight:700;line-height:1.28;margin:0">Odds as Implied Probabilities: Efficiency in Betting Markets</h3>
+          <p style="font-size:14px;line-height:1.6;color:#9a9aa6;margin:0">De-vigging, Poisson inversion of the Over/Under ladder into an implied goal intensity λ, then validation walk-forward, against closing lines, and on live Betfair in-play data. Finding so far: the market is efficient within transaction costs — the one surviving angle is structural (time decay, liquidity), not informational.</p>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">implied probability</span>
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">de-vigging</span>
+            <span style="padding:4px 10px;border-radius:999px;border:1px solid #2c2c36;background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#b9b9c6">market efficiency</span>
+          </div>
+          <span style="display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 18px;border-radius:999px;border:1px dashed #3a3a44;color:#6f6f7c;font-size:13.5px;font-weight:600">PDF coming soon</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="apps" data-screen-label="Apps and Code" style="position:relative;padding:64px 0 0;scroll-margin-top:16px;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:14%;left:-200px;width:440px;height:440px;background:radial-gradient(closest-side,rgba(139,92,246,.11),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="position:relative;max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px">
+        <span style="padding:6px 15px;border-radius:999px;border:1px solid rgba(139,92,246,.45);box-shadow:0 0 18px rgba(139,92,246,.28);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#c4b5fd">04 · APPS &amp; CODE</span>
+        <h2 style="font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-0.02em;text-align:center;margin:0">The app I couldn't find, so I built it</h2>
+      </div>
+      <article style="position:relative;background:#141418;border:1px solid rgba(139,92,246,.35);border-radius:20px;overflow:hidden;padding:22px 20px;display:flex;flex-direction:column;gap:18px;box-shadow:0 20px 70px rgba(139,92,246,.10)">
+        <div aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:340px;height:340px;background:radial-gradient(closest-side,rgba(139,92,246,.16),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+        <div style="position:relative;display:flex;align-items:center;gap:14px">
+          <img src="assets/boostnote-icon.png" alt="BoostNote app icon" style="width:66px;height:66px;border-radius:16px;border:1px solid rgba(139,92,246,.4);box-shadow:0 12px 40px rgba(139,92,246,.3);flex:none">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <h3 style="font-size:27px;font-weight:800;letter-spacing:-0.02em;margin:0">BoostNote</h3>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.12em;color:#c4b5fd">FLAGSHIP PROJECT · IN DEVELOPMENT</span>
+          </div>
+        </div>
+        <p style="position:relative;font-size:15px;line-height:1.65;color:#9a9aa6;margin:0">The iPad app for taking notes and studying, built for PoliMi engineering students: a custom Apple Pencil ink engine, WeBeep integration, every engineering tool in one ecosystem, and AI study paths — free by design.</p>
+        <div style="position:relative;display:flex;flex-direction:column;gap:10px">
+          <a href="BoostNote Info.dc.html#the-problem" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:14.5px;font-weight:600;text-decoration:none;box-shadow:0 4px 20px rgba(139,92,246,.3)">Explore the six ideas
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+          <a href="https://github.com/MarcoZambonii/BoostNote" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:999px;border:1px solid #2c2c36;background:#101014;color:#ececf1;font-size:14.5px;font-weight:600;text-decoration:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+            GitHub</a>
+        </div>
+        <div style="position:relative;display:flex;flex-direction:column;gap:10px">
+          <a href="BoostNote Info.dc.html#anti-hallucination" style="border:1px solid rgba(139,92,246,.45);border-radius:14px;background:rgba(139,92,246,.08);padding:15px;display:flex;flex-direction:column;gap:5px;text-decoration:none">
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#c4b5fd">Never on trust</span>
+            <span style="font-size:12.5px;line-height:1.5;color:#9a9aa6">The quote check uses no AI at all: every citation is matched against your source material and shown as verified or unverified — never quietly dropped. An exercise a second, independent solve disagrees with is discarded before it reaches you.</span>
+          </a>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px;display:flex;flex-direction:column;gap:5px">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#c4b5fd">240 Hz</span>
+              <span style="font-size:12px;line-height:1.5;color:#9a9aa6">Our own capture, rendering, eraser and lasso at full Pencil sample rate. PencilKit only as the storage format.</span>
+            </div>
+            <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px;display:flex;flex-direction:column;gap:5px">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#c4b5fd">Magic pen</span>
+              <span style="font-size:12px;line-height:1.5;color:#9a9aa6">Circle your handwriting: Wolfram solves it, LaTeX renders it, or it explains the step</span>
+            </div>
+            <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px;display:flex;flex-direction:column;gap:5px">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#c4b5fd">7 tools</span>
+              <span style="font-size:12px;line-height:1.5;color:#9a9aa6">To-Do, Pomodoro, calculator, paper search, graphs, Wolfram, PDF side-by-side</span>
+            </div>
+            <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px;display:flex;flex-direction:column;gap:5px">
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#4ade80">100% free</span>
+              <span style="font-size:12px;line-height:1.5;color:#9a9aa6">No subscriptions, no servers to maintain</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="beyond" data-screen-label="Beyond the Math" style="position:relative;padding:64px 0 0;scroll-margin-top:16px">
+    <div data-reveal="true" style="max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px">
+        <span style="padding:6px 15px;border-radius:999px;border:1px solid rgba(139,92,246,.45);box-shadow:0 0 18px rgba(139,92,246,.28);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#c4b5fd">05 · BEYOND THE MATH</span>
+        <h2 style="font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-0.02em;text-align:center;margin:0">Off the clock</h2>
+      </div>
+
+      <div style="background:#141418;border:1px solid #26262e;border-radius:18px;padding:22px 0;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:4px;padding:0 20px">
+          <h3 style="font-size:19px;font-weight:700;margin:0">Races</h3>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.1em;color:#6f6f7c">SWIPE THE TIMELINE · TAP FOR DETAILS</span>
+        </div>
+        <div ref="{{ racesRowRef }}" style="overflow-x:auto;padding:6px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+          <div style="display:flex;align-items:flex-start;min-width:min-content;padding:0 16px">
+            <div style="flex:none;width:168px;display:flex;flex-direction:column;align-items:center">
+              <div style="display:flex;align-items:center;width:100%">
+                <span style="flex:1;height:1px;background:repeating-linear-gradient(90deg,#26262e 0 6px,transparent 6px 12px)"></span>
+                <span style="width:11px;height:11px;border-radius:50%;background:transparent;border:1.5px solid #a78bfa;box-sizing:border-box;box-shadow:0 0 10px rgba(139,92,246,.35);flex:none"></span>
+                <span style="flex:1;height:1px;background:#26262e"></span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;padding:10px 0 8px">
+                <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#a78bfa">2026</span>
+                <span style="font-size:14px;font-weight:600;color:#9a9aa6;text-align:center;padding:0 8px">Ironman 70.3 Cervia</span>
+                <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#6f6f7c">TRIATHLON</span>
+                <span style="padding:3px 10px;border-radius:999px;border:1px dashed rgba(167,139,250,.5);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#c4b5fd">UPCOMING</span>
+                <div style="height:20px"></div>
+              </div>
+            </div>
+            <sc-for list="{{ races }}" as="race" hint-placeholder-count="3">
+              <div style="flex:none;width:168px;display:flex;flex-direction:column;align-items:center">
+                <div style="display:flex;align-items:center;width:100%">
+                  <span style="flex:1;height:1px;background:#26262e"></span>
+                  <span style="width:11px;height:11px;border-radius:50%;background:linear-gradient(92deg,#8b5cf6,#d946ef);box-shadow:0 0 10px rgba(139,92,246,.5);flex:none"></span>
+                  <span style="flex:1;height:1px;background:#26262e"></span>
+                </div>
+                <div tabIndex="0" onClick="{{ race.toggle }}" style="display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;outline:none;width:100%;padding:10px 0 8px;border-radius:12px;background:{{ race.bg }}">
+                  <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#a78bfa">{{ race.year }}</span>
+                  <span style="font-size:14px;font-weight:600;color:#ececf1;text-align:center;padding:0 8px">{{ race.name }}</span>
+                  <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.08em;color:#6f6f7c">{{ race.tag }}</span>
+                  <div style="height:44px;width:80%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px">
+                    <sc-if value="{{ race.active }}" hint-placeholder-val="{{ false }}">
+                      <svg width="100%" height="26" viewBox="0 0 120 36" fill="none" aria-hidden="true" preserveAspectRatio="none" style="overflow:visible"><path d="{{ race.path }}" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="220" style="animation:drawline 6s ease-in-out infinite"></path>
+                        <sc-if value="{{ race.dnf }}" hint-placeholder-val="{{ false }}">
+                          <g>
+                            <path d="M71.5 6.5 L76.5 11.5 M76.5 6.5 L71.5 11.5" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" style="animation:dnfx 6s ease-in-out infinite;opacity:0"></path>
+                            <text x="74" y="21" text-anchor="middle" fill="#f87171" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace" font-size="6.5" font-weight="700" letter-spacing="1" style="animation:dnfx 6s ease-in-out infinite;opacity:0">DNF</text>
+                            <g transform="translate(74,3)">
+                              <g style="animation:heliaway 6s ease-in-out infinite">
+                                <line x1="-5.5" y1="-6" x2="5.5" y2="-6" stroke="#c4b5fd" stroke-width="1.1" stroke-linecap="round" style="animation:rotorspin .5s linear infinite;transform-origin:0 -6px"></line>
+                                <line x1="0" y1="-6" x2="0" y2="-4" stroke="#c4b5fd" stroke-width="0.9"></line>
+                                <rect x="-3.4" y="-4" width="6.8" height="3.4" rx="1.7" fill="#c4b5fd"></rect>
+                                <path d="M3 -2.6 L8 -3.4 L8 -2 Z" fill="#c4b5fd"></path>
+                                <line x1="-3" y1="0.6" x2="3" y2="0.6" stroke="#c4b5fd" stroke-width="0.9" stroke-linecap="round"></line>
+                                <line x1="0" y1="0.6" x2="0" y2="4.6" stroke="#c4b5fd" stroke-width="0.5" stroke-dasharray="1 0.8"></line>
+                                <circle cx="0" cy="5.6" r="1" fill="#f87171"></circle>
+                                <line x1="0" y1="6.6" x2="0" y2="8.6" stroke="#f87171" stroke-width="0.8" stroke-linecap="round"></line>
+                              </g>
+                            </g>
+                          </g>
+                        </sc-if>
+                      </svg>
+                      <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.08em;color:#a78bfa;white-space:nowrap">{{ race.stats }}</span>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ hasActiveRace }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:0 20px;border-top:1px solid #26262e;padding-top:14px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.12em;color:#c4b5fd">{{ activeRaceResult }}</span>
+            <p style="font-size:13.5px;line-height:1.6;color:#9a9aa6;margin:0">{{ activeRaceDetail }}</p>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="background:#141418;border:1px solid #26262e;border-radius:18px;padding:22px 20px;margin-top:16px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <h3 style="font-size:19px;font-weight:700;margin:0">Mountaineering</h3>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.1em;color:#6f6f7c">A FEW WORTH MENTIONING</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px 16px;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <span style="font-size:15px;font-weight:700;color:#ececf1">Thorong La Pass</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#6f6f7c;border:1px solid #2c2c36;border-radius:999px;padding:3px 9px">NEPAL</span>
+            </div>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#a78bfa">150+ KM · TOP 5416 M</span>
+            <p style="font-size:13px;line-height:1.6;color:#9a9aa6;margin:0">Two weeks trekking the Annapurna circuit, over the Thorong La at 5416 m — the highest my legs have ever carried me.</p>
+          </div>
+          <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px 16px;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <span style="font-size:15px;font-weight:700;color:#ececf1">Alta Via n.1</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#6f6f7c;border:1px solid #2c2c36;border-radius:999px;padding:3px 9px">VALLE D'AOSTA</span>
+            </div>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#a78bfa">HUT TO HUT</span>
+            <p style="font-size:13px;line-height:1.6;color:#9a9aa6;margin:0">The Alta Via dei Giganti: multi-day hut-to-hut trek along the south side of the valley, under Monte Rosa, Cervino and Monte Bianco.</p>
+          </div>
+          <div style="border:1px solid #26262e;border-radius:14px;background:#101014;padding:15px 16px;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <span style="font-size:15px;font-weight:700;color:#ececf1">Piramide Vincent</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;color:#6f6f7c;border:1px solid #2c2c36;border-radius:999px;padding:3px 9px">MT. ROSA</span>
+            </div>
+            <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;color:#a78bfa">TOP 4215 M</span>
+            <p style="font-size:13px;line-height:1.6;color:#9a9aa6;margin:0">Mountaineering course: rope, crampons and ice axe on the Monte Rosa massif, up to the Piramide Vincent — first sunrise above the clouds.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#141418;border:1px solid #26262e;border-radius:18px;padding:22px 20px;margin-top:16px;display:flex;flex-direction:column;gap:14px">
+        <div style="position:relative;width:min(230px,68%);aspect-ratio:4/5;margin:0 auto">
+          <img src="assets/kyra-cutout.png" alt="Kyra, Belgian Malinois" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;mask-image:radial-gradient(ellipse 72% 66% at 50% 52%,#000 66%,rgba(0,0,0,.5) 88%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 72% 66% at 50% 52%,#000 66%,rgba(0,0,0,.5) 88%,transparent 100%)">
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h3 style="font-size:19px;font-weight:700;margin:0">Kyra</h3>
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid rgba(167,139,250,.45);background:#101014;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9px;letter-spacing:.1em;color:#c4b5fd">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+            PERSONAL PROTECTION DOG</span>
+        </div>
+        <p style="font-size:14px;line-height:1.65;color:#9a9aa6;margin:0"><strong style="color:#ececf1">Trained personal protection dog</strong> — we train together in protection work: obedience under pressure, controlled bite work, guarding on command. Off duty she is my pacer on every trail and the strictest enforcer of the daily schedule. Energy level: strictly greater than mine.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" data-screen-label="Contact" style="position:relative;padding:64px 0 30px;scroll-margin-top:16px;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;bottom:-220px;left:50%;transform:translateX(-50%);width:600px;height:460px;background:radial-gradient(closest-side,rgba(139,92,246,.16),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="position:relative;max-width:520px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px">
+        <span style="padding:6px 15px;border-radius:999px;border:1px solid rgba(139,92,246,.45);box-shadow:0 0 18px rgba(139,92,246,.28);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#c4b5fd">06 · CONTACT</span>
+        <h2 style="font-size:30px;font-weight:800;letter-spacing:-0.02em;text-align:center;margin:0">Get in <span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">touch</span></h2>
+      </div>
+      <div style="background:#141418;border:1px solid #26262e;border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:22px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#a78bfa">LOOKING FOR</span>
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="width:6px;height:6px;border-radius:50%;background:linear-gradient(92deg,#8b5cf6,#d946ef);flex:none;transform:translateY(-2px)"></span>
+            <span style="font-size:14.5px;line-height:1.55;color:#c9c9d4">Ideas, projects and interesting problems worth building</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="width:6px;height:6px;border-radius:50%;background:linear-gradient(92deg,#8b5cf6,#d946ef);flex:none;transform:translateY(-2px)"></span>
+            <span style="font-size:14.5px;line-height:1.55;color:#c9c9d4">Sporting challenges of any kind — trails, mountains, long days out...</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#6f6f7c">EMAIL</span>
+          <span style="font-size:16px;font-weight:600;color:#ececf1;user-select:all;word-break:break-all">marco1.zamboni@mail.polimi.it</span>
+          <button onClick="{{ copyEmail }}" aria-label="Copy email address" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:999px;border:1px solid #2c2c36;background:#101014;color:#c9c9d4;font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M16 4h-2a2 2 0 0 0-2 2v2"></path><path d="M4 12v-2a2 2 0 0 1 2-2h2"></path></svg>
+            {{ copyLabel }}</button>
+        </div>
+        <a href="assets/cv-marco-zamboni.pdf" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 24px;border-radius:999px;background:linear-gradient(92deg,#8b5cf6,#d946ef);color:#fff;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 4px 20px rgba(139,92,246,.3)">Download CV (PDF)
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></a>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#6f6f7c">CHANNELS</span>
+          <a href="https://github.com/MarcoZambonii" aria-label="GitHub profile" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:1px solid #2c2c36;background:#101014;color:#ececf1;text-decoration:none">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+            <span style="display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:14.5px;font-weight:600">GitHub</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;color:#6f6f7c">@MarcoZambonii</span>
+            </span>
+          </a>
+          <a href="https://linkedin.com" aria-label="LinkedIn profile" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:1px solid #2c2c36;background:#101014;color:#ececf1;text-decoration:none">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4V8h4v1.5"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+            <span style="display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:14.5px;font-weight:600">LinkedIn</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;color:#6f6f7c">MARCO ZAMBONI</span>
+            </span>
+          </a>
+          <a href="mailto:marco1.zamboni@mail.polimi.it" aria-label="Send an email" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:1px solid #2c2c36;background:#101014;color:#ececf1;text-decoration:none">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+            <span style="display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:14.5px;font-weight:600">Email</span>
+              <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.06em;color:#6f6f7c">USUALLY WITHIN A DAY</span>
+            </span>
+          </a>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:26px">
+        <p style="font-size:13px;color:#6f6f7c;margin:0">Still building. Mostly on the mountain.</p>
+        <p style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:9.5px;letter-spacing:.1em;color:#6f6f7c;margin:0;text-align:center">© 2026 MARCO ZAMBONI · MILAN, ITALY</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;showHeroChips&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;showParticles&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Background&quot;},&quot;particleCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:34,&quot;min&quot;:12,&quot;max&quot;:70,&quot;step&quot;:2,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Background&quot;}}">
+class Component extends DCLogic {
+  state = { activeRace: -1 };
+  raceData = [
+    { year: '2025', tag: 'TRAIL', name: 'TOR30', stats: '30K · 2300 M D+', path: 'M2 24 L12 19 L22 21 L34 14 L46 10 L58 6 L68 4 L74 9', detail: 'The short race of the TorX, Saint-Rhémy to Courmayeur over the Col de Malatrà (2925 m). Ended early: injury on course and a helicopter ride out. Unfinished business.', result: 'DNF · HELICOPTER OUT' },
+    { year: '2025', tag: 'SKYRACE', name: 'ResegUp', stats: '24K · 1800 M D+', path: 'M2 33 L16 26 L32 14 L48 5 L58 4 L70 10 L86 20 L102 28 L118 33', detail: 'From Piazza Garibaldi in Lecco to the Rifugio Azzoni on top of the Resegone (1877 m) and straight back down. Quads gone on the descent, worth every step.', result: 'FINISHED' },
+    { year: '2025', tag: 'ECO TRAIL', name: 'Monza–Montevecchia', stats: '33.5K · 700 M D+', path: 'M2 31 L16 29 L30 30 L44 26 L58 28 L72 24 L84 21 L92 18 L100 6 L108 10 L118 15', detail: 'The Brianza classic, Villa Reale to Montevecchia: rolling hills, river fords, the timed GPM climb at km 26 and 177 steps to the Santuario.', result: 'FINISHED' },
+    { year: '2024', tag: 'ROAD', name: 'Amsterdam Half Marathon', stats: '21.1K · FLAT', path: 'M2 26 L18 24 L36 27 L54 23 L72 26 L90 22 L106 25 L118 24', detail: 'Half marathon through Amsterdam — flat, fast, and windier than any forecast admitted.', result: 'FINISHED' },
+    { year: '2024', tag: 'NIGHT RELAY', name: 'Monza–Resegone', stats: '42K · 1100 M D+', path: 'M2 31 L24 30 L44 31 L64 29 L82 30 L96 27 L104 22 L110 13 L118 4', detail: 'The historic night race from the Arengario in Monza to the Capanna Alpinisti Monzesi (1173 m), in a team of three. 38 km of plain, then 600 m of climb in the last 4.', result: 'FINISHED' }
+  ];
+  canvasRef = React.createRef();
+  racesRowRef = React.createRef();
+  componentDidMount() {
+    this.mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.renderKatex();
+    this.startField();
+    this.onResize = () => { clearTimeout(this.rt); this.rt = setTimeout(() => this.startField(), 250); };
+    window.addEventListener('resize', this.onResize);
+    this.setupReveal();
+    this.peekIo = new IntersectionObserver((ents) => {
+      ents.forEach(e => { if (e.isIntersecting) this.peekRaces(); });
+    }, { threshold: 0.25 });
+    if (this.racesRowRef.current) this.peekIo.observe(this.racesRowRef.current);
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    clearTimeout(this.peekT);
+    clearTimeout(this.copyT);
+    if (this.peekIo) this.peekIo.disconnect();
+    if (this.io) this.io.disconnect();
+    window.removeEventListener('resize', this.onResize);
+  }
+  componentDidUpdate(prev) {
+    if (prev.particleCount !== this.props.particleCount || prev.showParticles !== this.props.showParticles) this.startField();
+  }
+  peekRaces() {
+    if (this.peeked) return;
+    const row = this.racesRowRef.current;
+    if (!row) return;
+    const max = row.scrollWidth - row.clientWidth;
+    if (max < 40) return;
+    this.peeked = true;
+    row.scrollLeft = 0;
+    if (this.mq && this.mq.matches) return;
+    this.peekT = setTimeout(() => {
+      row.scrollTo({ left: 120, behavior: 'smooth' });
+      this.peekT = setTimeout(() => row.scrollTo({ left: 0, behavior: 'smooth' }), 850);
+    }, 400);
+  }
+  renderKatex() {
+    const nodes = document.querySelectorAll('[data-katex]');
+    if (!nodes.length) return;
+    if (!window.katex) {
+      this.katexTries = (this.katexTries || 0) + 1;
+      if (this.katexTries < 25) setTimeout(() => this.renderKatex(), 200);
+      return;
+    }
+    nodes.forEach(n => {
+      try { window.katex.render(n.getAttribute('data-katex'), n, { throwOnError: false, displayMode: false }); n.removeAttribute('data-katex'); } catch (e) {}
+    });
+  }
+  copyEmail() {
+    const mail = 'marco1.zamboni@mail.polimi.it';
+    const done = () => { this.setState({ copied: true }); clearTimeout(this.copyT); this.copyT = setTimeout(() => this.setState({ copied: false }), 1800); };
+    if (navigator.clipboard) navigator.clipboard.writeText(mail).then(done, () => {});
+    else done();
+  }
+  startField() {
+    const cv = this.canvasRef.current;
+    if (!cv) return;
+    cancelAnimationFrame(this.raf);
+    const on = this.props.showParticles ?? true;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = cv.offsetWidth, h = cv.offsetHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    if (!on) return;
+    ctx.strokeStyle = '#a78bfa';
+    ctx.fillStyle = '#a78bfa';
+    ctx.lineWidth = 1;
+    const N = Math.max(12, Math.min(70, Math.round(this.props.particleCount ?? 34)));
+    const a = 0.14, R = 110;
+    const pts = Array.from({ length: N }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28 }));
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalAlpha = Math.min(1, a * 3);
+      pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, 7); ctx.fill(); });
+      for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.hypot(dx, dy);
+          if (d < R) { ctx.globalAlpha = a * (1 - d / R); ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke(); }
+        }
+      }
+    };
+    if (this.mq && this.mq.matches) { draw(); return; }
+    const loop = () => {
+      pts.forEach(p => { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > w) p.vx *= -1; if (p.y < 0 || p.y > h) p.vy *= -1; });
+      draw();
+      this.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+  setupReveal() {
+    if (this.mq.matches) return;
+    const els = document.querySelectorAll('[data-reveal]');
+    this.io = new IntersectionObserver((ents) => {
+      ents.forEach(e => {
+        if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'none'; this.io.unobserve(e.target); }
+      });
+    }, { threshold: 0.06 });
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = 'opacity .6s ease, transform .6s ease';
+      this.io.observe(el);
+    });
+  }
+  renderVals() {
+    const list = this.raceData.slice(); // newest first
+    const races = list.map((r, i) => ({
+      ...r,
+      dnf: (r.result || '').indexOf('DNF') === 0,
+      active: this.state.activeRace === i,
+      bg: this.state.activeRace === i ? 'rgba(139,92,246,.10)' : 'transparent',
+      toggle: () => this.setState(s => ({ activeRace: s.activeRace === i ? -1 : i }))
+    }));
+    const ar = this.state.activeRace >= 0 ? list[this.state.activeRace] : null;
+    return {
+      canvasRef: this.canvasRef,
+      racesRowRef: this.racesRowRef,
+      menuOpen: !!this.state.menuOpen,
+      toggleMenu: () => this.setState(s => ({ menuOpen: !s.menuOpen })),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      stopProp: (e) => e.stopPropagation(),
+      showChips: this.props.showHeroChips ?? true,
+      copyEmail: () => this.copyEmail(),
+      copyLabel: this.state.copied ? 'Copied' : 'Copy email',
+      races,
+      hasActiveRace: !!ar,
+      activeRaceDetail: ar ? ar.detail : '',
+      activeRaceResult: ar ? (ar.result + ' · ' + ar.stats) : ''
+    };
+  }
+}
+</script>
+</body>
+</html>
