@@ -39,7 +39,89 @@ a{color:#a78bfa} a:hover{color:#c4b5fd}
     </div>
   </section>
 
-  <section data-screen-label="Idea 1 Magic Pen" style="min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
+  <section id="the-problem" data-screen-label="00 The Problem" style="scroll-margin-top:70px;min-height:100vh;display:flex;align-items:center;padding:100px 0;box-sizing:border-box;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:-120px;left:-180px;width:620px;height:620px;background:radial-gradient(closest-side,rgba(139,92,246,.10),rgba(139,92,246,0) 70%);pointer-events:none"></div>
+    <div data-reveal="true" style="max-width:1080px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:52px;width:100%;position:relative">
+      <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
+        <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">00 · THE PROBLEM</span>
+        <h2 style="font-size:clamp(42px,6.5vw,78px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:0">One problem.<br><span style="background:linear-gradient(92deg,#8b5cf6,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent">Six answers.</span></h2>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+      <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.18em;color:#6f6f7c">THE PROBLEM — three faces of the same thing</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
+        <div style="display:flex;flex-direction:column;gap:10px;padding:22px;border:1px solid #1e1e26;border-radius:16px;background:#0c0c10;box-sizing:border-box;transition:border-color .2s,background .2s" style-hover="border-color:#2c2c36;background:#0e0e13">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.18em;color:#8a8a97">SCATTERED</span>
+          <p style="font-size:14px;line-height:1.7;color:#9a9aa6;margin:0;text-wrap:pretty">Your material lives in five places: handwriting on the iPad, the professor's PDFs on WeBeep, past exam papers, a textbook. The tools live in more — Wolfram, a plotter, a LaTeX editor. Every lookup costs you the page you were writing on.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:22px;border:1px solid #1e1e26;border-radius:16px;background:#0c0c10;box-sizing:border-box;transition:border-color .2s,background .2s" style-hover="border-color:#2c2c36;background:#0e0e13">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.18em;color:#8a8a97">NOT FREE, NOT YOURS</span>
+          <p style="font-size:14px;line-height:1.7;color:#9a9aa6;margin:0;text-wrap:pretty">Every tool that promises to fix it wants a subscription, or ships your notes to someone else's server — or both.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:22px;border:1px solid #1e1e26;border-radius:16px;background:#0c0c10;box-sizing:border-box;transition:border-color .2s,background .2s" style-hover="border-color:#2c2c36;background:#0e0e13">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.18em;color:#8a8a97">IT MAKES THINGS UP</span>
+          <p style="font-size:14px;line-height:1.7;color:#9a9aa6;margin:0;text-wrap:pretty">And the AI ones invent. A plausible summary and a worked solution with the wrong answer are worse than nothing, because they look right.</p>
+        </div>
+      </div>
+
+      </div>
+
+      <div style="display:flex;align-items:center;gap:0;width:100%">
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(139,92,246,0),rgba(139,92,246,.28))"></div>
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid rgba(139,92,246,.35);background:#0c0c10;flex:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+        </span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(139,92,246,.28),rgba(217,70,239,0))"></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+      <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.18em;color:#a78bfa">THE ANSWERS — six ideas, in order</span>
+      <div style="display:flex;flex-direction:column;width:100%">
+        <a href="#idea-01" data-prob="scattered" onMouseEnter="{{ rowEnter }}" onMouseLeave="{{ rowLeave }}" style="display:grid;grid-template-columns:52px minmax(0,clamp(150px,22vw,230px)) 1fr auto;align-items:center;gap:16px;padding:15px 8px;border-top:1px solid #1e1e26;text-decoration:none;transition:background .2s;box-sizing:border-box" style-hover="background:rgba(255,255,255,.028)">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#a78bfa">01</span>
+          <span style="font-size:15px;font-weight:500;color:#ececf1">The Magic Pen</span>
+          <span style="font-size:13.5px;color:#8a8a97;text-wrap:pretty">Solve where you write</span>
+          <svg data-arrow="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;transition:transform .2s ease,opacity .2s ease;opacity:.8"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+        <a href="#anti-hallucination" data-prob="invent" onMouseEnter="{{ rowEnter }}" onMouseLeave="{{ rowLeave }}" style="display:grid;grid-template-columns:52px minmax(0,clamp(150px,22vw,230px)) 1fr auto;align-items:center;gap:16px;padding:15px 8px;border-top:1px solid #1e1e26;text-decoration:none;transition:background .2s;box-sizing:border-box" style-hover="background:rgba(255,255,255,.028)">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#a78bfa">02</span>
+          <span style="font-size:15px;font-weight:500;color:#ececf1">The Studio</span>
+          <span style="font-size:13.5px;color:#8a8a97;text-wrap:pretty">Notes into a study path</span>
+          <svg data-arrow="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;transition:transform .2s ease,opacity .2s ease;opacity:.8"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+        <a href="#idea-03" data-prob="notfree" onMouseEnter="{{ rowEnter }}" onMouseLeave="{{ rowLeave }}" style="display:grid;grid-template-columns:52px minmax(0,clamp(150px,22vw,230px)) 1fr auto;align-items:center;gap:16px;padding:15px 8px;border-top:1px solid #1e1e26;text-decoration:none;transition:background .2s;box-sizing:border-box" style-hover="background:rgba(255,255,255,.028)">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#a78bfa">03</span>
+          <span style="font-size:15px;font-weight:500;color:#ececf1">The Chain</span>
+          <span style="font-size:13.5px;color:#8a8a97;text-wrap:pretty">Five models, 1,060 free calls</span>
+          <svg data-arrow="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;transition:transform .2s ease,opacity .2s ease;opacity:.8"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+        <a href="#idea-04" data-prob="invent" onMouseEnter="{{ rowEnter }}" onMouseLeave="{{ rowLeave }}" style="display:grid;grid-template-columns:52px minmax(0,clamp(150px,22vw,230px)) 1fr auto;align-items:center;gap:16px;padding:15px 8px;border-top:1px solid #1e1e26;text-decoration:none;transition:background .2s;box-sizing:border-box" style-hover="background:rgba(255,255,255,.028)">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#a78bfa">04</span>
+          <span style="font-size:15px;font-weight:500;color:#ececf1">Parallelism</span>
+          <span style="font-size:13.5px;color:#8a8a97;text-wrap:pretty">Four modules, one wait</span>
+          <svg data-arrow="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;transition:transform .2s ease,opacity .2s ease;opacity:.8"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+        <a href="#idea-05" data-prob="notfree" onMouseEnter="{{ rowEnter }}" onMouseLeave="{{ rowLeave }}" style="display:grid;grid-template-columns:52px minmax(0,clamp(150px,22vw,230px)) 1fr auto;align-items:center;gap:16px;padding:15px 8px;border-top:1px solid #1e1e26;text-decoration:none;transition:background .2s;box-sizing:border-box" style-hover="background:rgba(255,255,255,.028)">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#a78bfa">05</span>
+          <span style="font-size:15px;font-weight:500;color:#ececf1">The Constraint</span>
+          <span style="font-size:13.5px;color:#8a8a97;text-wrap:pretty">Free by architecture</span>
+          <svg data-arrow="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;transition:transform .2s ease,opacity .2s ease;opacity:.8"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+        <a href="#idea-06" data-prob="scattered" onMouseEnter="{{ rowEnter }}" onMouseLeave="{{ rowLeave }}" style="display:grid;grid-template-columns:52px minmax(0,clamp(150px,22vw,230px)) 1fr auto;align-items:center;gap:16px;padding:15px 8px;border-top:1px solid #1e1e26;border-bottom:1px solid #1e1e26;text-decoration:none;transition:background .2s;box-sizing:border-box" style-hover="background:rgba(255,255,255,.028)">
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#a78bfa">06</span>
+          <span style="font-size:15px;font-weight:500;color:#ececf1">The Ink</span>
+          <span style="font-size:13.5px;color:#8a8a97;text-wrap:pretty">240 Hz, our own engine</span>
+          <svg data-arrow="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;transition:transform .2s ease,opacity .2s ease;opacity:.8"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+      </div>
+
+      </div>
+
+      <p style="font-size:13px;line-height:1.7;color:#6f6f7c;margin:0;text-align:center">Six ideas, one iPad app, no subscription. Here's how each one works.</p>
+    </div>
+  </section>
+
+  <section id="idea-01" data-screen-label="Idea 1 Magic Pen" style="scroll-margin-top:70px;min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
     <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:22px;width:100%">
       <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
         <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 01 · THE MAGIC PEN</span>
@@ -171,7 +253,7 @@ a{color:#a78bfa} a:hover{color:#c4b5fd}
     </div>
   </section>
 
-  <section data-screen-label="Idea 2 Chain" style="min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
+  <section id="idea-03" data-screen-label="Idea 2 Chain" style="scroll-margin-top:70px;min-height:100vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
     <div aria-hidden="true" style="position:absolute;top:20%;right:-200px;width:600px;height:600px;background:radial-gradient(closest-side,rgba(217,70,239,.09),rgba(217,70,239,0) 70%);pointer-events:none"></div>
     <div data-reveal="true" style="max-width: 980px; margin: 0 auto; padding: 0 clamp(20px,5vw,56px); box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; width: 100%; position: relative">
       <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
@@ -218,7 +300,7 @@ a{color:#a78bfa} a:hover{color:#c4b5fd}
 
   
 
-  <section data-screen-label="Idea 4 Parallel" style="min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
+  <section id="idea-04" data-screen-label="Idea 4 Parallel" style="scroll-margin-top:70px;min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
     <div aria-hidden="true" style="position:absolute;bottom:0;left:-200px;width:600px;height:600px;background:radial-gradient(closest-side,rgba(139,92,246,.10),rgba(139,92,246,0) 70%);pointer-events:none"></div>
     <div data-reveal="true" style="max-width:800px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:32px;width:100%;position:relative">
       <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
@@ -283,7 +365,7 @@ a{color:#a78bfa} a:hover{color:#c4b5fd}
     </div>
   </section>
 
-  <section data-screen-label="Idea 5 Cost" style="min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
+  <section id="idea-05" data-screen-label="Idea 5 Cost" style="scroll-margin-top:70px;min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box">
     <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:36px;width:100%">
       <div style="display:flex;flex-direction:column;gap:18px;text-align:center;align-items:center">
         <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 05 · THE CONSTRAINT</span>
@@ -309,7 +391,7 @@ a{color:#a78bfa} a:hover{color:#c4b5fd}
     </div>
   </section>
 
-  <section data-screen-label="Idea 6 Ink" style="min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
+  <section id="idea-06" data-screen-label="Idea 6 Ink" style="scroll-margin-top:70px;min-height:90vh;display:flex;align-items:center;padding:90px 0;box-sizing:border-box;position:relative;overflow:hidden">
     <div aria-hidden="true" style="position:absolute;top:10%;right:-180px;width:560px;height:560px;background:radial-gradient(closest-side,rgba(139,92,246,.12),rgba(139,92,246,0) 70%);pointer-events:none"></div>
     <div data-reveal="true" style="max-width:900px;margin:0 auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box;display:flex;flex-direction:column;gap:28px;width:100%;text-align:center;align-items:center;position:relative">
       <span style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;color:#a78bfa">IDEA 06 · THE INK</span>
@@ -562,6 +644,11 @@ class Component extends DCLogic {
     if (which === 'pen') this.stopToolsAuto();
     if (this.autoTimers[which]) { clearInterval(this.autoTimers[which]); delete this.autoTimers[which]; }
   }
+  rowHover(e, on) {
+    const row = e.currentTarget;
+    const arrow = row.querySelector('[data-arrow]');
+    if (arrow) { arrow.style.transform = on ? 'translateX(4px)' : ''; arrow.style.opacity = on ? '1' : ''; }
+  }
   renderVals() {
     const src = this.state.src;
     const btn = (on) => 'padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s ease;' +
@@ -639,6 +726,8 @@ class Component extends DCLogic {
       return { name: d.name, lab: s === 'idle' ? d.idle : modLab[s][0], labColor: s === 'idle' ? '#6f6f7c' : modLab[s][1], barStyle: bar, trackWidth: d.track };
     });
     return {
+      rowEnter: (e) => this.rowHover(e, true),
+      rowLeave: (e) => this.rowHover(e, false),
       pickDigital: () => { this.manualVault = 1; this.stopAuto('vault'); this.setState({ src: 'digital' }); },
       pickScan: () => { this.manualVault = 1; this.stopAuto('vault'); this.setState({ src: 'scan' }); },
       pickHand: () => { this.manualVault = 1; this.stopAuto('vault'); this.setState({ src: 'hand' }); },
