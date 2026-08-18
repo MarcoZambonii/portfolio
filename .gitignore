@@ -5,5 +5,7 @@
 # only, so committing this file publishes the document. See README.
 assets/research-irbema.pdf
 
-# Sorgente del ritratto scontornato: 13 MB, in pagina serve assets/portrait.webp
+# Sorgenti pesanti degli scontorni: in pagina servono le versioni webp
 assets/portrait.png
+assets/Hero.png
+assets/Kyra.png

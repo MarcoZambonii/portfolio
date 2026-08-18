@@ -35,10 +35,11 @@ fuori centinaia di righe che sono solo le patch.
 | `<head>` | solo charset e viewport | `<title>`, description, og/twitter, `lang`, favicon, theme-color |
 | Paper PDF | link a jsdelivr, `target="_blank"` | `assets/article-risk-neutral-density.pdf`, stessa tab |
 | Copertina libro | `<image-slot id="book-cover">` | stesso slot con `src="assets/book-cover.png"` |
-| Hero | `<img src="assets/portrait-hero.png">`, misure in px fissi | `assets/portrait-hero.webp` (170 KB invece di 1,26 MB), px convertiti in percentuali |
-| Sidecar | `.image-slots.state.json`, tre slot | `image-slots.state.json` (senza punto, `STATE_FILE` corretto in `image-slot.js`), resta solo `kyra-photo` |
+| Hero | `<img src="assets/portrait-hero-2.png">`, `left:50px; top:12px` | `assets/portrait-hero-2.webp` (108 KB invece di 3,9 MB), px convertiti in percentuali |
+| Kyra | `<img src="assets/kyra-cutout.png">` | `assets/kyra-cutout.webp` (66 KB invece di 6,3 MB) |
+| Sidecar | `.image-slots.state.json` | eliminato: resta solo lo slot `book-cover`, che usa `src` |
 | CV | nessun bottone | `assets/cv-marco-zamboni.pdf` + riga "Fair warning: this site is probably more up to date than the CV." |
-| Tesi Irbema | `assets/research-irbema.pdf` presente | file **assente** e in `.gitignore` — la password è client-side, vedi commento nel file |
+| Tesi Irbema | `assets/research-irbema.pdf` presente | file **assente** e in `.gitignore` — la password è client-side |
 
 I px in pixel fissi dell'hero e dei pill arrivano dal posizionamento a mano nel
 canvas: su schermi stretti non scalano, quindi vanno riconvertiti in percentuali
