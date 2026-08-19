@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Local patch (not in the design export): serve the mobile page to phones.
+   Disjoint conditions on the two pages, so the pair can never loop.
+   Escape hatch: boostnote.html?desktop keeps the desktop layout on a phone. */
+(function(){try{
+  if(/[?&]desktop(=|&|$)/.test(location.search))return;
+  if(window.innerWidth<768)location.replace('boostnote-mobile.html'+location.search+location.hash);
+}catch(e){}})();
+</script>
 <title>BoostNote — how it works</title>
 <meta name="description" content="How BoostNote turns lecture material into study notes: the retrieval loop, the anti-hallucination checks, and the vault architecture behind the app.">
 <meta name="author" content="Marco Zamboni">
